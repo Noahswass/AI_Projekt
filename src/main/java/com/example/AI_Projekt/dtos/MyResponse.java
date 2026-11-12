@@ -1,4 +1,4 @@
-package com.example.chatgptjokes.dtos;
+package com.example.AI_Projekt.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
