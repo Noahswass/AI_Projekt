@@ -1,4 +1,4 @@
-# AI-Projekt (ui-ai): Sprint & Product Backlog
+# AI_Projekt: Sprint & Product Backlog
 
 ## 1. Product overview
 A LEGO companion web app. 
@@ -20,7 +20,7 @@ Pages:
 - **Admin (`/admin/**`)**: sync status and manual sync trigger.
 
 ## 2. Assumptions (confirm before Sprint 2)
-- **Backend:** one Spring Boot 3.3.x app named `ui-ai`, Java 21, Maven. Package `com.example.uiai`.
+- **Backend:** one Spring Boot 3.3.x app named `AI_Projekt`, Java 21, Maven. Package `com.example.AI_Projekt`.
     Thymeleaf UI is served from the same jar (fullstack, one deployable).
 - **Catalog source:** Rebrickable API v3 (`https://rebrickable.com/api/v3`),
     authenticated with the header `Authorization: key <KEY>`.
@@ -32,13 +32,16 @@ Pages:
   **Open question:** does "through AI" mean the LLM performs the sync, or only the Q&A? 
     The design below assumes the sync is plain code, which is safer and cheaper.
 - **Own data:** Rebrickable user collections need the user's Rebrickable
-  identity. Assumed approach: the user creates a Rebrickable user token and
-  pastes it in `/me/settings`. The token is stored encrypted (AES-GCM). We never
-  store the user's Rebrickable password. **Open question:** confirm this flow,
-  and check Rebrickable's API docs for how a user token is obtained.
+  identity. Decided approach: anyone can register and use their account without
+  a Rebrickable account. Linking is optional and only required for the personal
+  collection features. To link, the user enters their Rebrickable username and
+  password once in `/me/settings`; the app exchanges them for a user token
+  (`POST /users/_token/`) and stores only the token, encrypted (AES-GCM). We never
+  store or log the user's Rebrickable password. **To verify:** the exact request
+  fields of the token endpoint in Rebrickable's API docs.
 - **LLM:** Claude Messages API, `claude-haiku-5-5` for development, behind an
   `LlmClient` interface.
-- **Database:** PostgreSQL 16 in prod, H2 for dev and tests. Schema versioned
+- **Database:** MySQL (set with `DB_URL`), H2 in MySQL mode as the fallback and for tests. Schema versioned
   with Flyway. Hibernate `ddl-auto` is `validate`.
 - **Users:** a small number of users. Single role `USER`, plus `ADMIN`.
 - **Capacity:** about 6–7 points per day for a restart.
@@ -49,7 +52,7 @@ Pages:
 Browser (Thymeleaf pages)
    │
    ▼
-ui-ai (Spring Boot)
+AI_Projekt (Spring Boot)
  ├── web/        Thymeleaf controllers (public + /me + /admin)
  ├── security/   Spring Security: form login, BCrypt, roles, CSRF
  ├── catalog/    Public catalog services + JPA repositories (read from local DB)
@@ -62,7 +65,7 @@ ui-ai (Spring Boot)
  └── error/      @RestControllerAdvice, ProblemDetail
    │                       │
    ▼                       ▼
-PostgreSQL              Rebrickable API v3        Claude Messages API
+MySQL                   Rebrickable API v3        Claude Messages API
 (catalog, users,        (daily sync, user data)   (assistant)
  collection, sync runs)
 ```
@@ -78,12 +81,12 @@ collection lookup) → PromptBuilder → LlmClient`.
 | Table | Key fields |
 |-------|------------|
 | `theme` | id, name, parent_id |
-| `lego_color` | id, name, rgb |
-| `lego_set` | set_num (unique), name, year, theme_id, num_parts, img_url, synced_at |
-| `part` | part_num (unique), name, category, img_url, synced_at |
+| `lego_colour` | id, name, rgb |
+| `lego_set` | id (generated), set_num (unique), name, release_year, theme_id, num_parts, set_img_url, set_url, last_modified_dt, last_sync_dt |
+| `part` | part_num (unique), name, category, img_url, last_sync_dt |
 | `set_part` | set_id, part_id, color_id, quantity, is_spare (inventory) |
 | `minifig` | fig_num (unique), name, num_parts, img_url |
-| `app_user` | id, username, password_hash, role, enabled |
+| `app_user` | id, username, password_hash, role, enabled (default true) |
 | `rebrickable_link` | user_id, token_encrypted, linked_at, last_import_at (Sprint 2) |
 | `collection_item` | user_id, item_type (SET/PART/MINIFIG), item_ref, color_id, quantity, notes (Sprint 2) |
 | `sync_run` | id, started_at, finished_at, status, counts_json, error_message |
@@ -96,9 +99,9 @@ relative estimates.
 ### Epic A: Foundation
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
-| PB-01 | P0 | As a developer, I have a building `ui-ai` project | 2 | `mvn clean verify` passes on JDK 21. Package layout from section 3 exists. `.gitignore` covers `target/`, `.idea/`, `.env`. |
+| PB-01 | P0 | As a developer, I have a building `AI_Projekt` project | 2 | `mvn clean verify` passes on JDK 21. Package layout from section 3 exists. `.gitignore` covers `target/`, `.idea/`, `.env`. |
 | PB-02 | P0 | As a developer, the app starts with H2 and a health endpoint | 2 | `mvn spring-boot:run` on 8080. `GET /actuator/health` returns `UP`. Context-load test passes. |
-| PB-03 | P0 | As a developer, the schema is versioned | 2 | Flyway `V1__init.sql` creates catalog and user tables. `ddl-auto=validate`. Migration runs on H2 and PostgreSQL. |
+| PB-03 | P0 | As a developer, the schema is versioned | 2 | Flyway `V1__init.sql` is an empty baseline, `V2__catalog.sql` creates the catalog tables and `V3__user.sql` creates the user table. `ddl-auto=validate`. Migrations run on H2 and MySQL. |
 | PB-04 | P0 | As the system, I call Rebrickable with auth and resilience | 3 | `RebrickableClient` sends `Authorization: key <KEY>` from env. Timeouts set. Paginated responses are followed. 429 and 5xx retried with backoff. Mapped to DTO records. WireMock tests for success, 401, 429 and timeout. |
 
 ### Epic B: Daily catalog sync
@@ -118,15 +121,15 @@ relative estimates.
 ### Epic D: Accounts and security
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
-| PB-11 | P0 | As a visitor, I can register and log in | 3 | Form login and registration. BCrypt password hashes. Session cookie. CSRF on all forms. `/me/**` redirects to `/login` when anonymous. Integration test covers register, login and access rules. |
+| PB-11 | P0 | As a visitor, I can register and log in | 3 | Form login and registration. No Rebrickable account needed to register; a new account is enabled and can log in at once. BCrypt password hashes. Session cookie. CSRF on all forms. `/me/**` redirects to `/login` when anonymous. Integration test covers register, login and access rules. |
 | PB-12 | P1 | As the owner, admin pages are restricted to ADMIN | 1 | `/admin/**` returns 403 for USER. Admin account created by config or migration (no default password in git). |
 
 ### Epic E: Own data from Rebrickable (Sprint 2)
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
-| PB-13 | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a user token. Token encrypted with AES-GCM (key from env). Token never shown again or logged. Can be removed. |
-| PB-14 | P0 | As a user, my Rebrickable collection is imported | 4 | Import pulls the user's sets and parts into `collection_item`. Re-import updates, does not duplicate. Errors shown on `/me`. |
-| PB-15 | P0 | As a user, I can view and edit my collection | 3 | `/me/collection` lists items with filter by type and theme. Quantity and notes editable. Changes saved locally. |
+| PB-13 | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a Rebrickable username and password and exchanges them for a user token (`POST /users/_token/`). The password is never stored or logged. Wrong credentials give a clear message and no link. Token encrypted with AES-GCM (key from env). Token never shown or logged. Link can be removed. Linking is optional; the account works without it. WireMock test for success and wrong credentials. |
+| PB-14 | P0 | As a user, my Rebrickable collection is imported | 4 | Only available with a linked account. Import pulls the user's sets and parts into `collection_item`. Re-import updates, does not duplicate. Errors shown on `/me`. |
+| PB-15 | P0 | As a user, I can view and edit my collection | 3 | `/me/collection` lists items with filter by type and theme. Quantity and notes editable. Changes saved locally. Without a linked account the page shows a prompt to link in `/me/settings` instead of an error. |
 | PB-16 | P1 | As a user, I can refresh my data on demand | 2 | "Refresh" button re-imports from Rebrickable. Rate-limited per user. |
 
 ### Epic F: AI assistant (Sprint 2)
@@ -143,7 +146,7 @@ relative estimates.
 | PB-21 | P1 | As a user, I get clear errors instead of stack traces | 1 | `@RestControllerAdvice` returns `ProblemDetail` for validation, Rebrickable, LLM and access errors. Pages show friendly messages. |
 | PB-22 | P1 | As a developer, config and secrets come from env vars and profiles | 1 | `dev` and `prod` profiles. `.env.example` lists all variables. No secrets in git. |
 | PB-23 | P1 | As a developer, I can trust changes because of tests | 3 | Unit tests for sync mapping, PromptBuilder and token encryption. Integration tests for security rules and catalog pages. Coverage at least 70% on `rebrickable`, `security` and `ai`. |
-| PB-24 | P2 | As a developer, I can run the full stack with one command | 2 | `docker-compose.yml` starts PostgreSQL and `ui-ai` with the `prod` profile. |
+| PB-24 | P2 | As a developer, I can run the full stack with one command | 2 | `docker-compose.yml` starts MySQL and `AI_Projekt` with the `prod` profile. |
 
 **Totals**
 - Sprint 1 (P0 and P1 in Epics A–D, G): PB-01 to PB-12, PB-21 to PB-23 = 35
@@ -193,7 +196,7 @@ Stretch on Friday: PB-10, PB-12.
 |------|------------|------------|
 | Rebrickable rate limits make the daily full sync too slow | High | Batch and cache. Respect 429 with backoff. Fall back to Rebrickable's catalog downloads if needed. Sync incrementally after the first full load. |
 | Rebrickable terms or attribution requirements for displaying its data | Medium | Read the API terms before launch. Add attribution to catalog pages. |
-| User tokens leak | Medium | Encrypt with AES-GCM. Key only in env. Never log tokens. Let users revoke or remove them. |
+| User tokens or Rebrickable passwords leak | Medium | The password is used once for the token exchange and never stored or logged. Encrypt tokens with AES-GCM. Key only in env. Never log tokens. Let users revoke or remove them. |
 | LLM invents set or part facts | Medium | Answer only from DB data. Show sources. Say "I don't know" when data is missing. |
 | LLM cost from anonymous traffic | Medium | Rate limits (PB-19). Cheap model. Token logging (PB-20). |
 | Scope creep beyond two sprints | High | Keep P2 items as stretch. Review scope at each sprint start. |

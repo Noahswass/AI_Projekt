@@ -1,8 +1,8 @@
-# ui-ai: Setup Guide
+# AI_Projekt: Setup Guide
 
-Goal: a Spring Boot 3.3.x / Maven app named `ui-ai` that builds, starts, reports healthy, connects to PostgreSQL or H2, and can reach the Rebrickable API and the LLM API. Java 21.
+Goal: a Spring Boot 3.3.x / Maven app named `AI_Projekt` that builds, starts, reports healthy, connects to PostgreSQL or H2, and can reach the Rebrickable API and the LLM API. Java 21.
 
-> Renamed from the earlier `ai-projekt` skeleton. Artifact `ui-ai`, package `com.example.uiai`. If you already created the old package, rename it in IntelliJ (Refactor → Rename) before continuing.
+> Artifact `AI_Projekt`, package `com.example.AI_Projekt`. The earlier name `ui-ai` / `com.example.uiai` is no longer used.
 
 ## 1. Prerequisites
 
@@ -23,11 +23,11 @@ IntelliJ settings:
 ## 2. Create the repository
 
 ```bash
-mkdir ui-ai && cd ui-ai
+mkdir AI_Projekt && cd AI_Projekt
 git init -b main
-mkdir -p src/main/java/com/example/uiai/{config,security,catalog,rebrickable,sync,collection,ai,web,error}
+mkdir -p src/main/java/com/example/AI_Projekt/{config,security,catalog,rebrickable,sync,collection,ai,web,error}
 mkdir -p src/main/resources/{templates,static,db/migration}
-mkdir -p src/test/java/com/example/uiai
+mkdir -p src/test/java/com/example/AI_Projekt
 ```
 
 ### `.gitignore`
@@ -59,9 +59,9 @@ target/
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>ui-ai</artifactId>
+    <artifactId>AI_Projekt</artifactId>
     <version>0.1.0-SNAPSHOT</version>
-    <name>ui-ai</name>
+    <name>AI_Projekt</name>
 
     <properties>
         <java.version>21</java.version>
@@ -172,9 +172,9 @@ Spring Boot manages the versions of Spring, Lombok, Flyway, H2 and PostgreSQL. O
 ```yaml
 spring:
   application:
-    name: ui-ai
+    name: AI_Projekt
   datasource:
-    url: ${DB_URL:jdbc:h2:mem:uiai;MODE=PostgreSQL;DB_CLOSE_DELAY=-1}
+    url: ${DB_URL:jdbc:h2:mem:AI_Projekt;MODE=PostgreSQL;DB_CLOSE_DELAY=-1}
     username: ${DB_USERNAME:sa}
     password: ${DB_PASSWORD:}
   jpa:
@@ -222,7 +222,7 @@ spring:
       path: /h2-console
 logging:
   level:
-    com.example.uiai: DEBUG
+    com.example.AI_Projekt: DEBUG
 ```
 
 ### `.env.example` (commit this, not `.env`)
@@ -277,10 +277,10 @@ Save one sample response from each into `src/test/resources/fixtures/` for WireM
 
 ## 5. Minimal code to prove the setup
 
-### `src/main/java/com/example/uiai/UiAiApplication.java`
+### `src/main/java/com/example/AI_Projekt/AI_ProjektApplication.java`
 
 ```java
-package com.example.uiai;
+package com.example.AI_Projekt;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -290,18 +290,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableScheduling
-public class UiAiApplication {
+public class AI_ProjektApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(UiAiApplication.class, args);
+        SpringApplication.run(AI_ProjektApplication.class, args);
     }
 }
 ```
 
-### `src/main/java/com/example/uiai/config/RebrickableProperties.java`
+### `src/main/java/com/example/AI_Projekt/config/RebrickableProperties.java`
 
 ```java
-package com.example.uiai.config;
+package com.example.AI_Projekt.config;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -311,10 +311,10 @@ public record RebrickableProperties(String baseUrl, String apiKey, Duration time
 }
 ```
 
-### `src/main/java/com/example/uiai/config/HttpClientConfig.java`
+### `src/main/java/com/example/AI_Projekt/config/HttpClientConfig.java`
 
 ```java
-package com.example.uiai.config;
+package com.example.AI_Projekt.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -345,10 +345,10 @@ public class HttpClientConfig {
 
 The LLM client gets its own `RestClient` bean in Sprint 2 (`LlmProperties`). Do not share one `RestClient` between upstreams.
 
-### `src/main/java/com/example/uiai/error/GlobalExceptionHandler.java`
+### `src/main/java/com/example/AI_Projekt/error/GlobalExceptionHandler.java`
 
 ```java
-package com.example.uiai.error;
+package com.example.AI_Projekt.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -378,16 +378,16 @@ Placeholder so Flyway has a first migration. The real catalog tables come on Tue
 SELECT 1;
 ```
 
-### `src/test/java/com/example/uiai/UiAiApplicationTests.java`
+### `src/test/java/com/example/AI_Projekt/AI_ProjektApplicationTests.java`
 
 ```java
-package com.example.uiai;
+package com.example.AI_Projekt;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UiAiApplicationTests {
+class AI_ProjektApplicationTests {
 
     @Test
     void contextLoads() {
@@ -413,7 +413,7 @@ Checklist:
 - [ ] `java -version` and `mvn -v` both show Java 21
 - [ ] `mvn clean verify` passes, including `contextLoads`
 - [ ] `/actuator/health` returns `UP`
-- [ ] H2 console opens at `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:mem:uiai`, user `sa`, blank password)
+- [ ] H2 console opens at `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:mem:AI_Projekt`, user `sa`, blank password)
 - [ ] Rebrickable `curl` returns colours
 - [ ] LLM `curl` returns a reply
 - [ ] Sample responses saved under `src/test/resources/fixtures/`
@@ -427,9 +427,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: uiai
-      POSTGRES_USER: uiai
-      POSTGRES_PASSWORD: uiai
+      POSTGRES_DB: ai_projekt
+      POSTGRES_USER: ai_projekt
+      POSTGRES_PASSWORD: ai_projekt
     ports:
       - "5432:5432"
     volumes:
@@ -440,9 +440,9 @@ volumes:
 
 ```bash
 docker compose up -d db
-export DB_URL=jdbc:postgresql://localhost:5432/uiai
-export DB_USERNAME=uiai
-export DB_PASSWORD=uiai
+export DB_URL=jdbc:postgresql://localhost:5432/ai_projekt
+export DB_USERNAME=ai_projekt
+export DB_PASSWORD=ai_projekt
 mvn spring-boot:run
 ```
 
@@ -452,7 +452,7 @@ Flyway runs on startup. Use H2 for quick tests and Postgres for anything you wan
 
 ```bash
 git add .
-git commit -m "chore: bootstrap ui-ai with health endpoint, Flyway and Rebrickable client config"
+git commit -m "chore: bootstrap AI_Projekt with health endpoint, Flyway and Rebrickable client config"
 ```
 
 ## 9. Troubleshooting
