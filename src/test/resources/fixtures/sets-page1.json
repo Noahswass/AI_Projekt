@@ -1,0 +1,37 @@
+{
+  "count": 28597,
+  "next": "https://rebrickable.com/api/v3/lego/sets/?page=2&page_size=3",
+  "previous": null,
+  "results": [
+    {
+      "set_num": "0003977811-1",
+      "name": "Ninjago: Book of Adventures",
+      "year": 2022,
+      "theme_id": 761,
+      "num_parts": 1,
+      "set_img_url": "https://cdn.rebrickable.com/media/sets/0003977811-1/136318.jpg",
+      "set_url": "https://rebrickable.com/sets/0003977811-1/ninjago-book-of-adventures/",
+      "last_modified_dt": "2024-01-24T19:20:15.546851Z"
+    },
+    {
+      "set_num": "001-1",
+      "name": "Gears",
+      "year": 1965,
+      "theme_id": 756,
+      "num_parts": 43,
+      "set_img_url": "https://cdn.rebrickable.com/media/sets/001-1/11530.jpg",
+      "set_url": "https://rebrickable.com/sets/001-1/gears/",
+      "last_modified_dt": "2024-01-08T19:22:27.085452Z"
+    },
+    {
+      "set_num": "0011-2",
+      "name": "Town Mini-Figures",
+      "year": 1979,
+      "theme_id": 67,
+      "num_parts": 12,
+      "set_img_url": "https://cdn.rebrickable.com/media/sets/0011-2/3318.jpg",
+      "set_url": "https://rebrickable.com/sets/0011-2/town-mini-figures/",
+      "last_modified_dt": "2021-07-04T19:03:52.273186Z"
+    }
+  ]
+}
