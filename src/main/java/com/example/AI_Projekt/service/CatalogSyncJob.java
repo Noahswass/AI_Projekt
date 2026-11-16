@@ -1,4 +1,5 @@
 package com.example.AI_Projekt.service;
+import com.example.AI_Projekt.entity.SyncRun;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -6,16 +7,16 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class CatalogSyncJob {
-    private final CatalogSyncService catalogSyncService;
+    private final SyncRunService syncRunService;
 
-    public CatalogSyncJob(CatalogSyncService catalogSyncService) {
-        this.catalogSyncService = catalogSyncService;
+    public CatalogSyncJob(SyncRunService syncRunService) {
+        this.syncRunService = syncRunService;
     }
     @Scheduled(cron = "${app.sync.cron}", zone = "${app.sync.zone}")
     public void runDailySync() {
         log.info("Starting catalog sync job");
-        boolean result = catalogSyncService.syncAll();
-        log.info("Catalog sync job completed, all tables synced: {}", result);
+        SyncRun run = syncRunService.run();
+        log.info("Catalog sync job completed, sync_run {} has status {}", run.getId(), run.getStatus());
     }
 
 }
