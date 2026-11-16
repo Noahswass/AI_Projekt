@@ -23,7 +23,7 @@ public class HTTPClientConfig {
      * @return the rest client
      */
     @Bean
-    RestClient rebrickableRestClient(RestClient.Builder builder) {
+    public RestClient rebrickableRestClient(RestClient.Builder builder) {
         var factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(rebrickable.timeout());
         factory.setReadTimeout(rebrickable.timeout());
