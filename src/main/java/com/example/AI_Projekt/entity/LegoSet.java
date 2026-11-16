@@ -1,5 +1,7 @@
 package com.example.AI_Projekt.entity;
 
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,13 +20,16 @@ public class LegoSet {
     @Id
  @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String setNum;
+    @Column(name = "set_num")
+    private String legoSetNum;
     private String name;
     private Integer releaseYear;
     private Integer themeId;
     private Integer numParts;
-    private String setImgUrl;
-    private String setUrl;
+    @Column (name = "set_img_url")
+    private String legoSetImgUrl;
+    @Column (name = "set_url")
+    private String legoSetUrl;
     private Timestamp lastModifiedDt;
     private Timestamp lastSyncDt;
 }

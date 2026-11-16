@@ -5,5 +5,5 @@ import java.util.Optional;
 
 
 public interface LegoSetRepo extends JpaRepository<LegoSet, Integer> {
-    Optional<LegoSet> findBySetNum(String setNum);
+    Optional<LegoSet> findByLegoSetNum(String setNum);
 }
