@@ -44,6 +44,16 @@ public class RebrickableClient {
         });
     }
 
+    public List<PartDto> fetchParts() {
+        return fetchAll("/lego/parts/", new ParameterizedTypeReference<>() {
+        });
+    }
+
+    public List<MinifigDto> fetchMinifigs() {
+        return fetchAll("/lego/minifigs/", new ParameterizedTypeReference<>() {
+        });
+    }
+
     private <T> List<T> fetchAll(String path, ParameterizedTypeReference<PageResponse<T>> type) {
         List<T> all = new ArrayList<>();
         int page = 1;

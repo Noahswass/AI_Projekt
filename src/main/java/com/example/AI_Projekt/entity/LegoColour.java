@@ -12,7 +12,7 @@ import lombok.Setter;
 public class LegoColour {
     @Id
 
-    private int id;
+    private Integer id;
     private String name;
     private String rgb;
 }

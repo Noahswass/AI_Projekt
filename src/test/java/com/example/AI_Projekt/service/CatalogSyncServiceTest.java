@@ -47,17 +47,18 @@ public class CatalogSyncServiceTest {
 
         ));
         when(rebrickableClient.fetchColours()).thenReturn(List.of(
+                new ColourDto(0,"Blue","000001",true),
                 new ColourDto(1, "Black", "000000",true),
                 new ColourDto(2, "White", "FFFFFF",false)
         ));
         catalogSyncService.syncAll();
         assertThat(themeRepo.count()).isEqualTo(2);
         assertThat(legoSetRepo.count()).isEqualTo(1);
-        assertThat(legoColourRepo.count()).isEqualTo(2);
+        assertThat(legoColourRepo.count()).isEqualTo(3);
         catalogSyncService.syncAll();
         assertThat(themeRepo.count()).isEqualTo(2);
         assertThat(legoSetRepo.count()).isEqualTo(1);
-        assertThat(legoColourRepo.count()).isEqualTo(2);
+        assertThat(legoColourRepo.count()).isEqualTo(3);
 
     }
 }
