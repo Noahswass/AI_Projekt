@@ -8,12 +8,14 @@ import com.example.AI_Projekt.repository.LegoColourRepo;
 import com.example.AI_Projekt.repository.LegoSetRepo;
 import com.example.AI_Projekt.repository.ThemeRepo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 
 
 @Service
+@Transactional
 public class CatalogSyncService {
 
     private final RebrickableClient rebBrickableClient;
@@ -71,7 +73,13 @@ public class CatalogSyncService {
 
         return legoSets.size();
     }
-
+    public boolean syncAll() {
+        int themes = syncThemes();
+        int colours = syncColours();
+        int legoSets = syncLegoSets();
+        return themes > 0 && colours > 0 && legoSets > 0;
+    }
 
 }
+
 
