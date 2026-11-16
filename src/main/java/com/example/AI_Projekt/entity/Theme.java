@@ -11,7 +11,7 @@ import lombok.Setter;
 
 public class Theme {
     @Id
-    private int id;
+    private Integer id;
     private String name;
     private Integer parentId;
 }
