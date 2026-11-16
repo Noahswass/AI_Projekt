@@ -46,10 +46,11 @@ class RebrickableClientTest {
     void setUp() {
         var properties = new RebrickableProperties(
                 wireMock.baseUrl() + "/api/v3", "test-key",
-                Duration.ofMillis(300), MAX_ATTEMPTS, Duration.ofMillis(10));
+                Duration.ofMillis(3000), MAX_ATTEMPTS, Duration.ofMillis(10));
         RestClient restClient = new HTTPClientConfig(properties).rebrickableRestClient(RestClient.builder());
         client = new RebrickableClient(restClient, properties);
     }
+
 
     @Test
     void followsPaginationAndSendsApiKey() throws IOException {
@@ -136,10 +137,16 @@ class RebrickableClientTest {
 
     @Test
     void timeoutFailsWithRebrickableException() {
-        wireMock.stubFor(get(urlPathEqualTo(THEMES))
-                .willReturn(okJson(EMPTY_LAST_PAGE).withFixedDelay(1500)));
+        var properties = new RebrickableProperties(
+                wireMock.baseUrl() + "/api/v3", "test-key",
+                Duration.ofMillis(200), MAX_ATTEMPTS, Duration.ofMillis(10));
+        RestClient restClient = new HTTPClientConfig(properties).rebrickableRestClient(RestClient.builder());
+        var impatientClient = new RebrickableClient(restClient, properties);
 
-        assertThatThrownBy(() -> client.fetchThemes())
+        wireMock.stubFor(get(urlPathEqualTo(THEMES))
+                .willReturn(okJson(EMPTY_LAST_PAGE).withFixedDelay(500)));
+
+        assertThatThrownBy(() -> impatientClient.fetchThemes())
                 .isInstanceOf(RebrickableException.class)
                 .hasMessageContaining("did not respond")
                 .satisfies(ex -> assertThat(((RebrickableException) ex).getStatus()).isNull());
