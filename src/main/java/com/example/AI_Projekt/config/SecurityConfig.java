@@ -1,5 +1,6 @@
 package com.example.AI_Projekt.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -7,10 +8,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
   @Bean
   public SecurityFilterChain securityFilterChain(
@@ -31,10 +39,22 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests(auth -> auth
+            // The error page must be shown to everyone, or a visitor's 404 turns into a login prompt
+            .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+            .requestMatchers("/error").permitAll()
             // The public catalog is read-only and open to visitors
             .requestMatchers(HttpMethod.GET, "/catalog/**").permitAll()
+            // The landing page is where visitors start, so it is open too
+            .requestMatchers(HttpMethod.GET, "/").permitAll()
+            // Anyone can register (GET shows the form, POST creates the account)
+            .requestMatchers("/register").permitAll()
+            // formLogin's own permitAll() covers /login, /login?error and /login?logout exactly.
+            // This line opens the page with any other parameter too, such as /login?registered.
+            .requestMatchers(HttpMethod.GET, "/login").permitAll()
             .anyRequest().authenticated())
-        .formLogin(Customizer.withDefaults())
+        // Our own login page instead of the generated one; the users come from AppUserDetailsService
+        .formLogin(form -> form.loginPage("/login").permitAll())
+        .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
         .httpBasic(Customizer.withDefaults());
     return http.build();
   }

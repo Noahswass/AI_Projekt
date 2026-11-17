@@ -75,6 +75,64 @@ public class CatalogService {
         return options;
     }
 
+    /**
+     * The top-level themes that have at least one set, sorted by name. Sets in sub-themes count
+     * for their top-level theme, and the picture is the one of the biggest set in the whole group.
+     */
+    public List<ThemeCard> themeCards() {
+        Map<Integer, Theme> themes = themesById();
+
+        Map<Integer, Long> setCounts = new HashMap<>();
+        for (LegoSetRepo.ThemeSetCount row : legoSetRepo.countSetsPerTheme()) {
+            Integer top = topLevelId(row.getThemeId(), themes);
+            if (top != null) {
+                setCounts.merge(top, row.getSetCount(), Long::sum);
+            }
+        }
+
+        Map<Integer, LegoSetRepo.ThemePicture> pictures = new HashMap<>();
+        for (LegoSetRepo.ThemePicture row : legoSetRepo.findBiggestSetPicturePerTheme()) {
+            Integer top = topLevelId(row.getThemeId(), themes);
+            if (top != null) {
+                pictures.merge(top, row, (current, candidate) ->
+                        parts(candidate) > parts(current) ? candidate : current);
+            }
+        }
+
+        List<ThemeCard> cards = new ArrayList<>();
+        for (Map.Entry<Integer, Long> entry : setCounts.entrySet()) {
+            Integer id = entry.getKey();
+            LegoSetRepo.ThemePicture picture = pictures.get(id);
+            cards.add(new ThemeCard(id, themes.get(id).getName(), entry.getValue(),
+                    picture == null ? null : picture.getImgUrl()));
+        }
+        cards.sort(Comparator.comparing(ThemeCard::name, String.CASE_INSENSITIVE_ORDER));
+        return cards;
+    }
+
+    private int parts(LegoSetRepo.ThemePicture picture) {
+        return picture.getNumParts() == null ? -1 : picture.getNumParts();
+    }
+
+    /** The id of the theme at the top of this theme's parent chain, or null when the theme is unknown. */
+    private Integer topLevelId(Integer themeId, Map<Integer, Theme> themes) {
+        Theme theme = themes.get(themeId);
+        if (theme == null) {
+            return null;
+        }
+        Set<Integer> seen = new HashSet<>();
+        seen.add(theme.getId());
+        // Same caution as in themePath: a parent may be missing or (in theory) loop
+        while (theme.getParentId() != null && seen.add(theme.getParentId())) {
+            Theme parent = themes.get(theme.getParentId());
+            if (parent == null) {
+                break;
+            }
+            theme = parent;
+        }
+        return theme.getId();
+    }
+
     private Map<Integer, Theme> themesById() {
         Map<Integer, Theme> themes = new HashMap<>();
         for (Theme theme : themeRepo.findAll()) {
