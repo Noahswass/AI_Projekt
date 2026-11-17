@@ -3,7 +3,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-RebrickableCsv/
+doc/RebrickableCsv/
 
 ### STS ###
 .apt_generated

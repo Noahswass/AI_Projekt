@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Claude and Rebrickable</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        .same-size .btn {
+            width: 7rem;
+        }
+
+        .theme-img {
+            height: 9rem;
+            object-fit: contain;
+            padding: .5rem;
+            background: #fff;
+        }
+
+        .theme-img-missing {
+            height: 9rem;
+        }
+    </style>
+
+</head>
+
+<body>
+<main class="container py-4">
+    <div class="same-size d-flex align-items-center gap-3 mb-3 flex-wrap">
+        <h1 class="h3 mb-3">Welcome</h1>
+        <!-- Visitor: log in or register -->
+        <a class="btn btn-primary ms-auto" th:if="${username == null}" th:href="@{/login}">Login</a>
+        <a class="btn btn-primary" th:if="${username == null}" th:href="@{/register}">Register</a>
+        <!-- Logged in: own page and log out (a POST form, so it carries a CSRF token) -->
+        <span class="ms-auto" th:if="${username != null}">Logged in as
+            <strong th:text="${username}">username</strong></span>
+        <a class="btn btn-primary" th:if="${username != null}" th:href="@{/me}">My page</a>
+        <form method="post" th:action="@{/logout}" th:if="${username != null}">
+            <button type="submit" class="btn btn-outline-secondary">Log out</button>
+        </form>
+    </div>
+
+    <form method="get" th:action="@{/catalog/sets}" class="same-size row g-2 align-items-end mb-3">
+        <div class="col-12 col-md-4 col-lg-4">
+            <label for="q" class="form-label">Name or set number</label>
+            <input type="search" id="q" name="q" class="form-control" maxlength="100"
+                   placeholder="e.g. fire station or 60215">
+        </div>
+        <div class="col-auto d-flex gap-2 flex-wrap">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a class="btn btn-primary" th:href="@{/catalog/sets}">Browse All</a>
+            <a class="btn btn-primary" th:href="@{/claudeDemo.html}">Assistant</a>
+        </div>
+    </form>
+
+    <h2 class="h4 mt-4 mb-3">Themes</h2>
+
+    <div class="alert alert-info" th:if="${themes.isEmpty()}">
+        The catalog is empty. Sets appear here after the first sync.
+    </div>
+
+    <!-- One card per top-level theme. The whole card is a link to the sets of that theme. -->
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+        <div class="col" th:each="theme : ${themes}">
+            <div class="card h-100">
+                <img th:if="${theme.imgUrl != null}" th:src="${theme.imgUrl}" alt=""
+                     class="card-img-top theme-img" loading="lazy">
+                <div th:if="${theme.imgUrl == null}"
+                     class="theme-img-missing d-flex align-items-center justify-content-center text-secondary small bg-light">
+                    No picture
+                </div>
+                <div class="card-body">
+                    <h3 class="h6 card-title mb-1">
+                        <a class="stretched-link text-decoration-none" th:href="@{/catalog/sets(theme=${theme.id})}"
+                           th:text="${theme.name}">Theme name</a>
+                    </h3>
+                    <p class="card-text small text-secondary mb-0"
+                       th:text="${theme.setCount == 1 ? '1 set' : theme.setCount + ' sets'}">100 sets</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 small text-secondary">
+        Catalog data and pictures from <a href="https://rebrickable.com">Rebrickable</a>.
+    </footer>
+</main>
+</body>
+
+</html>
