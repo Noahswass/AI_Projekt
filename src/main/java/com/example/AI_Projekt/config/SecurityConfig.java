@@ -33,6 +33,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             // The public catalog is read-only and open to visitors
             .requestMatchers(HttpMethod.GET, "/catalog/**").permitAll()
+            // The landing page is where visitors start, so it is open too
+            .requestMatchers(HttpMethod.GET, "/").permitAll()
             .anyRequest().authenticated())
         .formLogin(Customizer.withDefaults())
         .httpBasic(Customizer.withDefaults());
