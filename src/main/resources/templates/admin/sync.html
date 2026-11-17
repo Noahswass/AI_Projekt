@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catalog sync</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+<main class="container py-4">
+    <h1 class="h3 mb-3">Catalog sync</h1>
+
+    <div class="alert alert-success" th:if="${message}" th:text="${message}">Sync started.</div>
+    <div class="alert alert-warning" th:if="${warning}" th:text="${warning}">Already running.</div>
+
+    <p class="text-secondary">The catalog syncs from Rebrickable every night at 02:00. Start a run here to sync now.</p>
+
+    <!-- th:action adds the CSRF token -->
+    <form method="post" th:action="@{/admin/sync}" class="mb-4">
+        <button type="submit" class="btn btn-primary" th:disabled="${running}"
+                th:text="${running} ? 'Sync is running...' : 'Start sync now'">Start sync now</button>
+    </form>
+
+    <h2 class="h5">Recent runs</h2>
+    <p th:if="${#lists.isEmpty(runs)}" class="text-secondary">No sync has run yet.</p>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(runs)}">
+        <table class="table table-sm align-middle">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Started</th>
+                <th>Finished</th>
+                <th>Status</th>
+                <th>Counts / error</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="run : ${runs}">
+                <td th:text="${run.id}">1</td>
+                <td th:text="${run.startedAt == null} ? '' : ${#dates.format(run.startedAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+                <td th:text="${run.finishedAt == null} ? '' : ${#dates.format(run.finishedAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+                <td>
+                    <span class="badge"
+                          th:classappend="${run.status?.name() == 'SUCCESS'} ? 'text-bg-success' : (${run.status?.name() == 'FAILED'} ? 'text-bg-danger' : 'text-bg-secondary')"
+                          th:text="${run.status}">SUCCESS</span>
+                </td>
+                <td class="small text-break" th:text="${run.errorMessage != null} ? ${run.errorMessage} : ${run.countsJson}">-</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a class="btn btn-outline-secondary" th:href="@{/me}">Back to my page</a>
+</main>
+</body>
+
+</html>

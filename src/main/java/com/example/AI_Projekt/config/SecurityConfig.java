@@ -51,6 +51,8 @@ public class SecurityConfig {
             // formLogin's own permitAll() covers /login, /login?error and /login?logout exactly.
             // This line opens the page with any other parameter too, such as /login?registered.
             .requestMatchers(HttpMethod.GET, "/login").permitAll()
+            // Admin pages, such as starting a catalog sync by hand
+            .requestMatchers("/admin/**").hasRole("ADMIN")
             .anyRequest().authenticated())
         // Our own login page instead of the generated one; the users come from AppUserDetailsService
         .formLogin(form -> form.loginPage("/login").permitAll())

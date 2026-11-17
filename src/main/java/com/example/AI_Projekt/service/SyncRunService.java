@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Runs the catalog sync and records the outcome in {@code sync_run}.
@@ -18,6 +22,9 @@ import java.time.Instant;
  * Deliberately NOT {@code @Transactional}: the sync runs in its own transaction inside
  * {@link CatalogSyncService}. When that transaction rolls back, the {@code sync_run} row
  * written here must survive, otherwise a failed run would leave no trace.
+ * <p>
+ * Only one run at a time (PB-07): the daily job and the admin button share one lock. The lock
+ * lives in memory, which is enough while the app runs as a single instance.
  */
 @Slf4j
 @Service
@@ -30,7 +37,52 @@ public class SyncRunService {
     private final SyncRunRepo syncRunRepo;
     private final ObjectMapper objectMapper;
 
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
+    /** Runs the sync now, in this thread. Throws when another run is already going. */
     public SyncRun run() {
+        if (!running.compareAndSet(false, true)) {
+            throw new SyncAlreadyRunningException();
+        }
+        try {
+            return doRun();
+        } finally {
+            running.set(false);
+        }
+    }
+
+    /**
+     * Takes the lock now and runs the sync on {@code executor}, so a web request does not wait
+     * minutes for it. Returns false, and starts nothing, when a run is already going.
+     */
+    public boolean startInBackground(Executor executor) {
+        if (!running.compareAndSet(false, true)) {
+            return false;
+        }
+        try {
+            executor.execute(() -> {
+                try {
+                    doRun();
+                } finally {
+                    running.set(false);
+                }
+            });
+            return true;
+        } catch (RejectedExecutionException ex) {
+            running.set(false);
+            throw ex;
+        }
+    }
+
+    public boolean isRunning() {
+        return running.get();
+    }
+
+    public List<SyncRun> recentRuns() {
+        return syncRunRepo.findTop10ByOrderByIdDesc();
+    }
+
+    private SyncRun doRun() {
         SyncRun run = new SyncRun();
         run.setStartedAt(Timestamp.from(Instant.now()));
         run.setStatus(SyncStatus.RUNNING);
