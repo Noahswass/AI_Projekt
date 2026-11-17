@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Log in</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+
+<body>
+<main class="container py-4" style="max-width: 28rem;">
+    <h1 class="h3 mb-3">Log in</h1>
+
+    <div class="alert alert-success" th:if="${param.registered}">
+        Your account is created. Log in to continue.
+    </div>
+    <div class="alert alert-info" th:if="${param.logout}">
+        You are logged out.
+    </div>
+    <!-- The same message for a wrong username and a wrong password, so nobody can test which names exist -->
+    <div class="alert alert-danger" th:if="${param.error}">
+        Wrong username or password.
+    </div>
+
+    <!-- th:action adds the hidden CSRF field. Spring Security handles the POST itself. -->
+    <form method="post" th:action="@{/login}">
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-control" maxlength="40"
+                   autocomplete="username" required autofocus>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password" class="form-control" maxlength="72"
+                   autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Log in</button>
+        <a class="btn btn-outline-secondary" th:href="@{/}">Cancel</a>
+    </form>
+
+    <p class="mt-4 mb-0">No account yet? <a th:href="@{/register}">Register</a></p>
+</main>
+</body>
+
+</html>
