@@ -69,6 +69,29 @@ class CatalogControllerTest {
     }
 
     @Test
+    void visitorSeesASetsDetailPage() throws Exception {
+        mockMvc.perform(get("/catalog/sets/42001-1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Race Car")))
+                .andExpect(content().string(containsString("Technic &gt; Cars")))
+                .andExpect(content().string(containsString("2024")))
+                .andExpect(content().string(containsString("100 parts")));
+    }
+
+    @Test
+    void anUnknownSetGivesNotFound() throws Exception {
+        mockMvc.perform(get("/catalog/sets/nope-1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void theListLinksToEachSetsDetailPage() throws Exception {
+        mockMvc.perform(get("/catalog/sets"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/catalog/sets/42000-1\"")));
+    }
+
+    @Test
     void secondPageShowsTheRest() throws Exception {
         mockMvc.perform(get("/catalog/sets").param("page", "2"))
                 .andExpect(status().isOk())
