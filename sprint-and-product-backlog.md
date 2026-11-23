@@ -116,7 +116,8 @@ relative estimates.
 |----|-----|-------|-----|---------------------|
 | PB-08 | P0 | As a visitor, I can browse and search sets without logging in | 3 | `/catalog/sets` paginated, filter by theme, search by name or set number. Data comes from the local DB. |
 | PB-09 | P0 | As a visitor, I can see a landing page with options | 2 | `/` lists browse, search, assistant and login/register options. Works without JavaScript. |
-| PB-10 | P1 | As a visitor, I can see set and part details | 2 | `/catalog/sets/{setNum}` shows theme, year, parts count and inventory. `/catalog/parts` lists parts. |
+| PB-10 | P1 | As a visitor, I can see set and part details | 2 | `/catalog/sets/{setNum}` shows picture, name, theme, year, parts count and a link to Rebrickable; an unknown set number gives the friendly 404. `/catalog/parts` lists parts with paging and search. (Inventory moved to PB-25.) |
+| PB-25 | P2 | As a visitor, I can see which parts are in a set | 3 | New migration for set inventories (part, colour, quantity, spare flag, minifigs). Filled from Rebrickable's catalog downloads, not live calls. `/catalog/sets/{setNum}` lists the newest inventory version. Re-import does not duplicate rows. |
 
 ### Epic D: Accounts and security
 | ID | Pri | Story | Pts | Acceptance criteria |

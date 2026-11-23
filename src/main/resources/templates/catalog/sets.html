@@ -58,7 +58,7 @@
 
     <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
         <div class="col" th:each="set : ${sets.content}">
-            <div class="card h-100">
+            <div class="card h-100" >
                 <img th:if="${set.imgUrl != null}" th:src="${set.imgUrl}" th:alt="${set.name}"
                      class="card-img-top set-img" loading="lazy">
                 <div th:if="${set.imgUrl == null}"
@@ -66,7 +66,10 @@
                     No picture
                 </div>
                 <div class="card-body">
-                    <h2 class="h6 card-title mb-1" th:text="${set.name}">Set name</h2>
+                        <h2 class="h6 card-title mb-1">
+                            <a class="stretched-link" th:href="@{/catalog/sets/{n}(n=${set.setNum})}" th:text="${set.name}">
+                                Set name </a>
+                        </h2>
                     <p class="card-text small text-secondary mb-1">
                         <span th:text="${set.setNum}">0000-1</span><span
                             th:if="${set.releaseYear != null}" th:text="${' · ' + set.releaseYear}"> · 2020</span>

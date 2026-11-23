@@ -1,8 +1,10 @@
 package com.example.AI_Projekt.service;
 
 import com.example.AI_Projekt.entity.LegoSet;
+import com.example.AI_Projekt.entity.Part;
 import com.example.AI_Projekt.entity.Theme;
 import com.example.AI_Projekt.repository.LegoSetRepo;
+import com.example.AI_Projekt.repository.PartRepo;
 import com.example.AI_Projekt.repository.ThemeRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /** Reads the public catalog from the local database. Never calls Rebrickable. */
@@ -31,11 +34,16 @@ public class CatalogService {
 
     public static final int PAGE_SIZE = 24;
     private static final Sort NEWEST_FIRST =
-            Sort.by(Sort.Order.desc("releaseYear"), Sort.Order.asc("legoSetNum"));
+            Sort.by(Sort.Order.desc("releaseYear"),
+                    Sort.Order.asc("legoSetNum"));
+    private static final Sort BY_PART_NAME =
+            Sort.by(Sort.Order.asc("name"),
+                    Sort.Order.asc("partNum"));
     private static final List<Integer> NO_THEME_FILTER = List.of(-1);
 
     private final LegoSetRepo legoSetRepo;
     private final ThemeRepo themeRepo;
+    private final PartRepo partRepo;
 
     /**
      * @param query   text to find in the name or the set number; null or blank for all sets
@@ -62,6 +70,36 @@ public class CatalogService {
                 themePath(set.getThemeId(), themes),
                 set.getNumParts(),
                 set.getLegoSetImgUrl()));
+    }
+
+    public Page<PartRow> searchParts(String query, int page) {
+        String pattern = likePattern(query);
+        int index = Math.max(page, 1) - 1;
+        Page<Part> result = partRepo.search(pattern,
+                PageRequest.of(index, PAGE_SIZE, BY_PART_NAME));
+        if (result.isEmpty() && result.getTotalPages() > 0) {
+            result = partRepo.search(pattern,
+                    PageRequest.of(result.getTotalPages() - 1, PAGE_SIZE, BY_PART_NAME));
+        }
+        return result.map(part -> new PartRow(
+                part.getPartNum(),
+                part.getName(),
+                part.getPartImgUrl(),
+                part.getPartUrl()));
+    }
+
+    public Optional<SetDetail> findSet(String setNum) {
+        Map<Integer, Theme> themes = themesById();
+        return legoSetRepo.findByLegoSetNum(setNum)
+                .map(set -> new SetDetail(
+                        set.getLegoSetNum(),
+                        set.getName(),
+                        set.getReleaseYear(),
+                        themePath(set.getThemeId(), themes),
+                        set.getNumParts(),
+                        set.getLegoSetImgUrl(),
+                        set.getLegoSetUrl()
+                ));
     }
 
     /** All themes for the filter, sorted by their full path. */
