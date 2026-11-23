@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${setDetail.name}"></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        .set-img {
+            height: 9rem;
+            object-fit: contain;
+            padding: .5rem;
+            background: #fff;
+        }
+
+        .set-img-missing {
+            height: 9rem;
+        }
+    </style>
+</head>
+
+<body>
+<main class="container py-4">
+    <h1 class="h3 mb-3" th:text="${setDetail.name}">Set name</h1>
+    <img th:if="${setDetail.imgUrl != null}" th:src="${setDetail.imgUrl}" th:alt="${setDetail.name}"
+         class="card-img-top set-img" loading="lazy">
+    <div th:if="${setDetail.imgUrl == null}"
+         class="set-img-missing d-flex align-items-center justify-content-center text-secondary small bg-light">
+        No picture
+    </div>
+    <div class="card-body">
+        <p class="card-text small text-secondary mb-1">
+            <span th:text="${setDetail.setNum}">0000-1</span><span
+                th:if="${setDetail.releaseYear != null}" th:text="${' · ' + setDetail.releaseYear}"> · 2020</span>
+        </p>
+        <p class="card-text small mb-1" th:if="${setDetail.themeName != null}" th:text="${setDetail.themeName}">Theme</p>
+        <p class="card-text small text-secondary mb-0" th:if="${setDetail.numParts != null}"
+           th:text="${setDetail.numParts + ' parts'}">100 parts</p>
+        <div>
+            <a class="btn" th:if="${setDetail.setUrl != null}" th:href="${setDetail.setUrl}" target="_blank" rel="noopener">See the set on Rebrickable</a>
+            <a class="btn btn-outline-primary" th:href="@{/catalog/sets}">Go back and see all sets</a>
+        </div>
+
+    </div>
+
+    <footer class="mt-5 small text-secondary">
+        Catalog data and pictures from <a href="https://rebrickable.com">Rebrickable</a>.
+    </footer>
+
+</main>
+</body>
+
+</html>

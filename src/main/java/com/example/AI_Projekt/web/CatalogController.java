@@ -1,14 +1,20 @@
 package com.example.AI_Projekt.web;
 
 import com.example.AI_Projekt.service.CatalogService;
+import com.example.AI_Projekt.service.SetDetail;
 import com.example.AI_Projekt.service.SetRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Optional;
 
 /** Public catalog pages. Everything is read from the local database. */
 @Controller
@@ -43,6 +49,17 @@ public class CatalogController {
         model.addAttribute("prevUrl", sets.hasPrevious() ? pageUrl(query, themeId, currentPage - 1) : null);
         model.addAttribute("nextUrl", sets.hasNext() ? pageUrl(query, themeId, currentPage + 1) : null);
         return "catalog/sets";
+    }
+
+    @GetMapping("/catalog/sets/{setNum}")
+    public String setByNum(@PathVariable String setNum, Model model) {
+        Optional<SetDetail> setDetail = catalogService.findSet(setNum);
+        if (setDetail.isPresent()) {
+            model.addAttribute("setDetail", setDetail.get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Set not found");
+        }
+        return "catalog/set";
     }
 
     private String pageUrl(String query, Integer themeId, int page) {
