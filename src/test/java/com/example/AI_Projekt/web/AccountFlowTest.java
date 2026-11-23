@@ -135,6 +135,17 @@ class AccountFlowTest {
         assertThat(appUserRepo.count()).isEqualTo(1);
     }
 
+    @Test
+    void theAdminUsernameCannotBeRegisteredInAnyCase() throws Exception {
+        // PB-12: app.admin.username is test_admin in application-test.properties. No admin row exists
+        // here (the password is blank in tests), so only the reserved name can stop this.
+        register("TEST_Admin", PASSWORD, PASSWORD)
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("That username is already taken.")));
+
+        assertThat(appUserRepo.count()).isZero();
+    }
+
     // --- Log in and out ---
 
     @Test
