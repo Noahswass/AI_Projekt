@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 doc/RebrickableCsv/
+doc/*.csv
 
 ### STS ###
 .apt_generated
