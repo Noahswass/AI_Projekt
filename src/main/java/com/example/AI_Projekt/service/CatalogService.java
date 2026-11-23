@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /** Reads the public catalog from the local database. Never calls Rebrickable. */
@@ -62,6 +63,20 @@ public class CatalogService {
                 themePath(set.getThemeId(), themes),
                 set.getNumParts(),
                 set.getLegoSetImgUrl()));
+    }
+
+    public Optional<SetDetail> findSet(String setNum) {
+        Map<Integer, Theme> themes = themesById();
+        return legoSetRepo.findByLegoSetNum(setNum)
+                .map(set -> new SetDetail(
+                        set.getLegoSetNum(),
+                        set.getName(),
+                        set.getReleaseYear(),
+                        themePath(set.getThemeId(), themes),
+                        set.getNumParts(),
+                        set.getLegoSetImgUrl(),
+                        set.getLegoSetUrl()
+                ));
     }
 
     /** All themes for the filter, sorted by their full path. */
