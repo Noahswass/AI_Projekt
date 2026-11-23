@@ -127,7 +127,7 @@ relative estimates.
 ### Epic E: Own data from Rebrickable (Sprint 2)
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
-| PB-13 | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a Rebrickable username and password and exchanges them for a user token (`POST /users/_token/`). The password is never stored or logged. Wrong credentials give a clear message and no link. Token encrypted with AES-GCM (key from env). Token never shown or logged. Link can be removed. Linking is optional; the account works without it. WireMock test for success and wrong credentials. |
+| PB-13 | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a Rebrickable username and password and exchanges them for a user token (`POST /users/_token/`). The password is never stored or logged. Wrong credentials give a clear message and no link. Token encrypted with AES-GCM (key from env). Token never shown or logged. Link can be removed. Linking is optional; the account works without it. WireMock test for success and wrong credentials. Unit test for token encryption. |
 | PB-14 | P0 | As a user, my Rebrickable collection is imported | 4 | Only available with a linked account. Import pulls the user's sets and parts into `collection_item`. Re-import updates, does not duplicate. Errors shown on `/me`. |
 | PB-15 | P0 | As a user, I can view and edit my collection | 3 | `/me/collection` lists items with filter by type and theme. Quantity and notes editable. Changes saved locally. Without a linked account the page shows a prompt to link in `/me/settings` instead of an error. |
 | PB-16 | P1 | As a user, I can refresh my data on demand | 2 | "Refresh" button re-imports from Rebrickable. Rate-limited per user. |
@@ -135,7 +135,7 @@ relative estimates.
 ### Epic F: AI assistant (Sprint 2)
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
-| PB-17 | P1 | As a visitor, I can ask the assistant questions about the catalog | 4 | `/assistant` answers from catalog data only. Prompt instructs "answer only from the data, say I don't know otherwise". Sources listed. Rate-limited for anonymous users. |
+| PB-17 | P1 | As a visitor, I can ask the assistant questions about the catalog | 4 | `/assistant` answers from catalog data only. Prompt instructs "answer only from the data, say I don't know otherwise". Sources listed. Rate-limited for anonymous users. Unit test for PromptBuilder. |
 | PB-18 | P1 | As a user, the assistant also answers about my collection | 3 | Logged-in answers include own collection context. Data limited per request (max items). Users cannot see another user's data. |
 | PB-19 | P1 | As the owner, AI endpoints are protected from abuse | 2 | Per-IP limit for anonymous and per-user limit for logged-in use (e.g. Bucket4j or a simple in-memory limiter). Returns 429 with ProblemDetail. |
 | PB-20 | P2 | As the owner, I can see LLM cost and latency | 2 | Each call logs model, latency, input and output tokens. Actuator metrics exposed. |
@@ -144,8 +144,8 @@ relative estimates.
 | ID | Pri | Story | Pts | Acceptance criteria |
 |----|-----|-------|-----|---------------------|
 | PB-21 | P1 | As a user, I get clear errors instead of stack traces | 1 | `@RestControllerAdvice` returns `ProblemDetail` for validation, Rebrickable, LLM and access errors. Pages show friendly messages. |
-| PB-22 | P1 | As a developer, config and secrets come from env vars and profiles | 1 | `dev` and `prod` profiles. `.env.example` lists all variables. No secrets in git. |
-| PB-23 | P1 | As a developer, I can trust changes because of tests | 3 | Unit tests for sync mapping, PromptBuilder and token encryption. Integration tests for security rules and catalog pages. Coverage at least 70% on `rebrickable`, `security` and `ai`. |
+| PB-22 | P1 | As a developer, config and secrets come from env vars and profiles | 1 | `dev` and `prod` profiles. `.env` lists all variables. No secrets in git. |
+| PB-23 | P1 | As a developer, I can trust changes because of tests | 3 | Unit tests for sync mapping. Integration tests for security rules and catalog pages. JaCoCo branch coverage at least 70% on `rebrickable` and `security`; `mvn verify` fails below it. (PromptBuilder and token encryption tests moved to PB-17 and PB-13 in Sprint 2.) |
 | PB-24 | P2 | As a developer, I can run the full stack with one command | 2 | `docker-compose.yml` starts MySQL and `AI_Projekt` with the `prod` profile. |
 
 **Totals**
