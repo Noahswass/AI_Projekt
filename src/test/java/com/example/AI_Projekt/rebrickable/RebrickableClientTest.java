@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.context.annotation.Condition;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -31,6 +32,8 @@ class RebrickableClientTest {
     private static final String THEMES = "/api/v3/lego/themes/";
     private static final String SETS = "/api/v3/lego/sets/";
     private static final String COLOURS = "/api/v3/lego/colors/";
+    private static final String PARTS = "/api/v3/lego/parts/";
+    private static final String MINIFIGS = "/api/v3/lego/minifigs/";
     private static final String EMPTY_LAST_PAGE =
             "{\"count\":0,\"next\":null,\"previous\":null,\"results\":[]}";
     private static final int MAX_ATTEMPTS = 3;
@@ -106,6 +109,16 @@ class RebrickableClientTest {
         assertThatThrownBy(() -> client.fetchThemes())
                 .isInstanceOf(RebrickableException.class)
                 .satisfies(ex -> assertThat(((RebrickableException) ex).getStatus()).isEqualTo(401));
+        wireMock.verify(1, getRequestedFor(urlPathEqualTo(THEMES)));
+    }
+    @Test
+    void emptyBodyFailsWithRebrickableException() {
+        wireMock.stubFor(get(urlPathEqualTo(THEMES))
+                .willReturn(okJson("")));
+
+        assertThatThrownBy(() -> client.fetchThemes())
+                .isInstanceOf(RebrickableException.class)
+                .hasMessageContaining("empty body");
         wireMock.verify(1, getRequestedFor(urlPathEqualTo(THEMES)));
     }
 
