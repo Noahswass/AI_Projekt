@@ -4,6 +4,7 @@ import com.example.AI_Projekt.service.RegistrationService;
 import com.example.AI_Projekt.service.UsernameTakenException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.security.Principal;
+
 import java.util.Objects;
 
 /** Register, log in and the user's own page. Checking the password is done by Spring Security. */
@@ -52,8 +53,11 @@ public class AccountController {
     }
 
     @GetMapping("/me")
-    public String me(Principal principal, Model model) {
-        model.addAttribute("username", principal.getName());
+    public String me(Authentication authentication, Model model) {
+        model.addAttribute("username", authentication.getName());
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        model.addAttribute("isAdmin", isAdmin);
         return "account/me";
     }
 }
