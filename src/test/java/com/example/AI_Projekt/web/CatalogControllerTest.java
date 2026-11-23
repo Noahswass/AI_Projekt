@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -131,6 +132,12 @@ class CatalogControllerTest {
     void otherPagesStillNeedALogin() throws Exception {
         mockMvc.perform(get("/actuator/metrics"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void visitorCannotPostToTheCatalog() throws Exception {
+        mockMvc.perform(post("/catalog/sets"))
+                .andExpect(status().isForbidden());
     }
 
     private void saveTheme(int id, String name, Integer parentId) {
