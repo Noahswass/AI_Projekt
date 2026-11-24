@@ -1,8 +1,10 @@
 package com.example.AI_Projekt.web;
 
 import com.example.AI_Projekt.entity.LegoSet;
+import com.example.AI_Projekt.entity.Part;
 import com.example.AI_Projekt.entity.Theme;
 import com.example.AI_Projekt.repository.LegoSetRepo;
+import com.example.AI_Projekt.repository.PartRepo;
 import com.example.AI_Projekt.repository.ThemeRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,11 +43,14 @@ class CatalogControllerTest {
     ThemeRepo themeRepo;
     @Autowired
     LegoSetRepo legoSetRepo;
+    @Autowired
+    PartRepo partRepo;
 
     @BeforeEach
     void seed() {
         legoSetRepo.deleteAll();
         themeRepo.deleteAll();
+        partRepo.deleteAll();
         saveTheme(TECHNIC, "Technic", null);
         saveTheme(CARS, "Cars", TECHNIC);
         saveTheme(CITY, "City", null);
@@ -53,6 +58,12 @@ class CatalogControllerTest {
         saveSet("42001-1", "Race Car", 2024, CARS);
         for (int number = 6000; number <= 6025; number++) {
             saveSet(number + "-1", "Fire Station " + number, 2010, CITY);
+        }
+        savePart("3001", "Brick 2x4");
+        savePart("3002", "Brick 2x2");
+        savePart("3003", "Brick 2x1");
+        for (int number = 4000; number <= 4025; number++) {
+            savePart(number + "", "Brick " + number);
         }
     }
 
@@ -76,6 +87,46 @@ class CatalogControllerTest {
                 .andExpect(content().string(containsString("Technic &gt; Cars")))
                 .andExpect(content().string(containsString("2024")))
                 .andExpect(content().string(containsString("100 parts")));
+    }
+
+    @Test
+    void visitorSeesThePartsList() throws Exception {
+        mockMvc.perform(get("/catalog/parts"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("3001")))
+                .andExpect(content().string(containsString("3002")))
+                .andExpect(content().string(containsString("3003")))
+                .andExpect(content().string(containsString("4000")))
+                .andExpect(content().string(not(containsString("4025"))))
+                .andExpect(content().string(containsString("of <span>29</span> parts")));
+    }
+
+    @Test
+    void visitorSearchPartSuccess() throws Exception {
+        mockMvc.perform(get("/catalog/parts").param("q", "2x"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Brick 2x4")))
+                .andExpect(content().string(not(containsString("Brick 4000"))))
+                .andExpect(content().string(containsString("of <span>3</span> parts")));
+        mockMvc.perform(get("/catalog/parts").param("q", "3001"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Brick 4000"))))
+                .andExpect(content().string(containsString("Brick 2x4")));
+    }
+
+    @Test
+    void firstPartsPageContainsRightPageNumber() throws Exception {
+        mockMvc.perform(get("/catalog/parts"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/catalog/parts?page=2")))
+                .andExpect(content().string(containsString("Page <span>1</span>")));
+    }
+
+    @Test
+    void wrongPartsPageNumberReturnsPage1() throws Exception {
+        mockMvc.perform(get("/catalog/parts?page=abc"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Page <span>1</span>")));
     }
 
     @Test
@@ -179,5 +230,11 @@ class CatalogControllerTest {
         set.setThemeId(themeId);
         set.setNumParts(100);
         legoSetRepo.save(set);
+    }
+    private void savePart(String partNum, String name) {
+        Part part = new Part();
+        part.setPartNum(partNum);
+        part.setName(name);
+        partRepo.save(part);
     }
 }
