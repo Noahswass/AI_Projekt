@@ -1,7 +1,7 @@
 package com.example.AI_Projekt.service;
 
 
-import com.example.AI_Projekt.rebrickable.ColourDto;
+import com.example.AI_Projekt.rebrickable.ColorDto;
 import com.example.AI_Projekt.rebrickable.SetDto;
 import com.example.AI_Projekt.rebrickable.ThemeDto;
 import com.example.AI_Projekt.repository.LegoColourRepo;
@@ -47,9 +47,9 @@ public class CatalogSyncServiceTest {
 
         ));
         when(rebrickableClient.fetchColours()).thenReturn(List.of(
-                new ColourDto(0,"Blue","000001",true),
-                new ColourDto(1, "Black", "000000",true),
-                new ColourDto(2, "White", "FFFFFF",false)
+                new ColorDto(0,"Blue","000001",true),
+                new ColorDto(1, "Black", "000000",true),
+                new ColorDto(2, "White", "FFFFFF",false)
         ));
         catalogSyncService.syncAll();
         assertThat(themeRepo.count()).isEqualTo(2);
