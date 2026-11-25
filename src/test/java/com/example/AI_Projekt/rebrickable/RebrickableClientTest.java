@@ -126,7 +126,7 @@ class RebrickableClientTest {
         wireMock.stubFor(post(urlPathEqualTo(USER_TOKEN))
                 .willReturn(aResponse().withStatus(403).withBody("{\"detail\":\"Invalid credentials\"}")));
         RebrickableException ex = assertThrows(RebrickableException.class, () -> client.fetchUserToken("anna","wrong"));
-        assertThat(ex.getMessage()).isEqualTo("403");
+        assertThat(ex.getStatus()).isEqualTo(403);
         wireMock.verify(1, postRequestedFor(urlPathEqualTo(USER_TOKEN))
                 .withRequestBody(equalTo("username=anna&password=wrong"))
                 .withHeader("Authorization", equalTo("key test-key")));
