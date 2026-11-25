@@ -10,4 +10,6 @@ public interface RebrickableAccountLinkRepo extends JpaRepository<RebrickableAcc
     Optional<RebrickableAccountLink> findByUserId(Integer userId);
 
     boolean existsByUserId(Integer userId);
+
+    Integer Id(Integer id);
 }
