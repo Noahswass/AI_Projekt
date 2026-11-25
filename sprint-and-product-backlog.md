@@ -118,6 +118,7 @@ relative estimates.
 | PB-09 | P0 | As a visitor, I can see a landing page with options | 2 | `/` lists browse, search, assistant and login/register options. Works without JavaScript. |
 | PB-10 | P1 | As a visitor, I can see set and part details | 2 | `/catalog/sets/{setNum}` shows picture, name, theme, year, parts count and a link to Rebrickable; an unknown set number gives the friendly 404. `/catalog/parts` lists parts with paging and search. (Inventory moved to PB-25.) |
 | PB-25 | P2 | As a visitor, I can see which parts are in a set | 3 | New migration for set inventories (part, colour, quantity, spare flag, minifigs). Filled from Rebrickable's catalog downloads, not live calls. `/catalog/sets/{setNum}` lists the newest inventory version. Re-import does not duplicate rows. |
+| PB-26 | P2 | As a visitor, every page shares one look and a site header | 2 | One stylesheet (`/css/app.css`) and one Thymeleaf fragment (`fragments/layout.html`) used by every page: Rubik font, colours from Rebrickable's colour list, a site header with links to Sets and Parts. Static files load for visitors (security permits the standard static folders). No login or logout links in the header, so the existing landing-page access rules hold. All existing page tests pass. |
 
 ### Epic D: Accounts and security
 | ID | Pri | Story | Pts | Acceptance criteria |
@@ -152,7 +153,7 @@ relative estimates.
 **Totals**
 - Sprint 1 (P0 and P1 in Epics A–D, G): PB-01 to PB-12, PB-21 to PB-23 = 35
   points. P0 items alone = 27 points.
-- Sprint 2 (Epics E and F, plus PB-24): PB-13 to PB-20, PB-24 = 26 points.
+- Sprint 2 (Epics E and F, plus PB-24 and PB-26): PB-13 to PB-20, PB-24, PB-26 = 28 points.
 
 The full scope does not fit in one five-day sprint. Sprint 1 delivers the public
 catalog, the daily sync and login. Sprint 2 delivers the personal collection and
