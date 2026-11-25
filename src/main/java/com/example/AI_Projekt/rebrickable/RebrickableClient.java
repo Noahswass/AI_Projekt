@@ -32,36 +32,37 @@ public class RebrickableClient {
     private final RebrickableProperties properties;
 
     public List<ThemeDto> fetchThemes() {
-        return fetchAll("/lego/themes/", new ParameterizedTypeReference<>() {
-        });
+        return fetchAll("/lego/themes/", new ParameterizedTypeReference<>() {});
     }
 
-    public List<ColourDto> fetchColours() {
-        return fetchAll("/lego/colors/", new ParameterizedTypeReference<>() {
-        });
+    public List<ColorDto> fetchColours() {
+        return fetchAll("/lego/colors/", new ParameterizedTypeReference<>() {});
     }
 
     public List<SetDto> fetchSets() {
-        return fetchAll("/lego/sets/", new ParameterizedTypeReference<>() {
-        });
+        return fetchAll("/lego/sets/", new ParameterizedTypeReference<>() {});
+    }
+    public List<UserSetDto> fetchUserSets(String token) {
+        return fetchAll("/users/{token}/sets/", new ParameterizedTypeReference<>() {}, token);
     }
 
     public List<PartDto> fetchParts() {
-        return fetchAll("/lego/parts/", new ParameterizedTypeReference<>() {
-        });
+        return fetchAll("/lego/parts/", new ParameterizedTypeReference<>() {});
+    }
+    public List<UserPartDto> fetchUserParts(String token) {
+        return fetchAll("/users/{token}/allparts/", new ParameterizedTypeReference<>() {}, token);
     }
 
     public List<MinifigDto> fetchMinifigs() {
-        return fetchAll("/lego/minifigs/", new ParameterizedTypeReference<>() {
-        });
+        return fetchAll("/lego/minifigs/", new ParameterizedTypeReference<>() {});
     }
 
-    private <T> List<T> fetchAll(String path, ParameterizedTypeReference<PageResponse<T>> type) {
+    private <T> List<T> fetchAll(String path, ParameterizedTypeReference<PageResponse<T>> type, Object...uriVars) {
         List<T> all = new ArrayList<>();
         int page = 1;
         PageResponse<T> response;
         do {
-            response = fetchPage(path, page, type);
+            response = fetchPage(path, page, type, uriVars);
             if (response == null || response.results() == null) {
                 throw new RebrickableException("Rebrickable returned an empty body for " + path, null, null);
             }
@@ -97,7 +98,7 @@ public class RebrickableClient {
         }
     }
 
-    private <T> PageResponse<T> fetchPage(String path, int page, ParameterizedTypeReference<PageResponse<T>> type) {
+    private <T> PageResponse<T> fetchPage(String path, int page, ParameterizedTypeReference<PageResponse<T>> type, Object... uriVars) {
         Duration backoff = properties.backoff();
         for (int attempt = 1; ; attempt++) {
             try {
@@ -105,7 +106,7 @@ public class RebrickableClient {
                         .uri(uri -> uri.path(path)
                                 .queryParam("page", page)
                                 .queryParam("page_size", PAGE_SIZE)
-                                .build())
+                                .build(uriVars))
                         .retrieve()
                         .body(type);
             } catch (RestClientResponseException ex) {
