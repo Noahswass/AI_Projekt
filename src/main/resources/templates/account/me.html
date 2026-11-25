@@ -18,7 +18,6 @@
     <div class="d-flex gap-2 flex-wrap">
         <a class="btn btn-primary" th:href="@{/}">Front page</a>
         <a class="btn btn-primary" th:href="@{/catalog/sets}">Browse sets</a>
-        <a class="btn btn-primary" th:href="@{/account/settings}">Settings</a>
         <a class="btn btn-primary" th:if="${isAdmin}" th:href="@{/admin/sync}">Sync Catalog</a>
         <!-- Logging out changes something, so it is a POST with a CSRF token, not a link -->
         <form method="post" th:action="@{/logout}">
