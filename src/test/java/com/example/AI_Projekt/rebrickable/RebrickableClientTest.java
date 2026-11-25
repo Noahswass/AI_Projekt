@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.context.annotation.Condition;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -31,6 +30,8 @@ class RebrickableClientTest {
     private static final String COLOURS = "/api/v3/lego/colors/";
     private static final String PARTS = "/api/v3/lego/parts/";
     private static final String MINIFIGS = "/api/v3/lego/minifigs/";
+    private static final String USER_SETS = "/api/v3/users/tok123/sets/";
+    private static final String USER_PARTS = "/api/v3/users/tok123/allparts/";
     private static final String EMPTY_LAST_PAGE =
             "{\"count\":0,\"next\":null,\"previous\":null,\"results\":[]}";
     private static final int MAX_ATTEMPTS = 3;
@@ -87,6 +88,27 @@ class RebrickableClientTest {
                 "https://rebrickable.com/sets/001-1/gears/",
                 Instant.parse("2024-01-08T19:22:27.085452Z")));
     }
+    @Test
+    void mapsUserSets() {
+        wireMock.stubFor(get(urlPathEqualTo(USER_SETS)).willReturn(okJson("""
+                {"count":1,"next":null,"previous":null,
+                 "results":[{"quantity":2,"set":{"set_num":"10281-1"}}]}""")));
+        List<UserSetDto> sets = client.fetchUserSets("tok123");
+        assertThat(sets).hasSize(1);
+        assertThat(sets.get(0).quantity()).isEqualTo(2);
+        assertThat(sets.get(0).set().legoSetNum()).isEqualTo("10281-1");
+    }
+    @Test
+    void mapsUserParts() {
+        wireMock.stubFor(get(urlPathEqualTo(USER_PARTS)).willReturn(okJson("""
+                {"count":1,"next":null,"previous":null,
+                 "results":[{"quantity":14,"part":{"part_num":"3001"},"color":{"id": 4}}]}""")));
+        List<UserPartDto> parts = client.fetchUserParts("tok123");
+        assertThat(parts).hasSize(1);
+        assertThat(parts.get(0).quantity()).isEqualTo(14);
+        assertThat(parts.get(0).part().partNum()).isEqualTo("3001");
+        assertThat(parts.get(0).color().id()).isEqualTo(4);
+    }
 
     @Test
     void mapsColourFieldsAndIgnoresUnknownOnes() {
@@ -95,7 +117,7 @@ class RebrickableClientTest {
                  "results":[{"id":-1,"name":"[Unknown]","rgb":"0033B2","is_trans":true,
                              "external_ids":{"BrickOwl":{"ext_ids":[0]}}}]}""")));
 
-        assertThat(client.fetchColours()).containsExactly(new ColourDto(-1, "[Unknown]", "0033B2", true));
+        assertThat(client.fetchColours()).containsExactly(new ColorDto(-1, "[Unknown]", "0033B2", true));
     }
 
     @Test
@@ -119,6 +141,15 @@ class RebrickableClientTest {
         wireMock.verify(postRequestedFor(urlPathEqualTo(USER_TOKEN))
                 .withRequestBody(equalTo("username=anna&password=secret"))
                 .withHeader("Authorization", equalTo("key test-key")));
+    }
+
+    @Test
+    void wrongTokenGives404AndHidesToken() {
+        wireMock.stubFor(get(urlPathEqualTo(USER_SETS))
+                .willReturn(aResponse().withStatus(404).withBody("{\"detail\":\"Not found.\"}")));
+        RebrickableException ex = assertThrows(RebrickableException.class, () -> client.fetchUserSets("tok123"));
+        assertThat(ex.getStatus()).isEqualTo(404);
+        assertThat(ex.getMessage()).doesNotContain("tok123");
     }
 
     @Test
