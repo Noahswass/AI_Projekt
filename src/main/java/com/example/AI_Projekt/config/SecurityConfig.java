@@ -42,6 +42,8 @@ public class SecurityConfig {
             // The error page must be shown to everyone, or a visitor's 404 turns into a login prompt
             .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
             .requestMatchers("/error").permitAll()
+            // Stylesheets and scripts (/css/**, /js/**, /images/**, ...), or visitors get unstyled pages
+            .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
             // The public catalog is read-only and open to visitors
             .requestMatchers(HttpMethod.GET, "/catalog/**").permitAll()
             // The landing page is where visitors start, so it is open too

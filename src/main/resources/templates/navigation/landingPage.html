@@ -5,28 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Claude and Rebrickable</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <th:block th:replace="~{fragments/layout :: assets}"></th:block>
     <style>
         .same-size .btn {
             width: 7rem;
         }
 
-        .theme-img {
-            height: 9rem;
-            object-fit: contain;
-            padding: .5rem;
-            background: #fff;
-        }
-
-        .theme-img-missing {
-            height: 9rem;
-        }
     </style>
 
 </head>
 
 <body>
+<header th:replace="~{fragments/layout :: siteHeader}"></header>
 <main class="container py-4">
     <div class="same-size d-flex align-items-center gap-3 mb-3 flex-wrap">
         <h1 class="h3 mb-3">Welcome</h1>
