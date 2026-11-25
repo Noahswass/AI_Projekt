@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.context.annotation.Condition;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
@@ -95,7 +94,7 @@ class RebrickableClientTest {
                  "results":[{"id":-1,"name":"[Unknown]","rgb":"0033B2","is_trans":true,
                              "external_ids":{"BrickOwl":{"ext_ids":[0]}}}]}""")));
 
-        assertThat(client.fetchColours()).containsExactly(new ColourDto(-1, "[Unknown]", "0033B2", true));
+        assertThat(client.fetchColours()).containsExactly(new ColorDto(-1, "[Unknown]", "0033B2", true));
     }
 
     @Test

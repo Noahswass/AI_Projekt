@@ -6,5 +6,5 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record ColourDto(int id, String name, String rgb, boolean isTrans) {
+public record ColorDto(int id, String name, String rgb, boolean isTrans) {
 }
