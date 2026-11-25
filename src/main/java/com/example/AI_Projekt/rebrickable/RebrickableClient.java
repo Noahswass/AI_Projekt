@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -70,6 +72,31 @@ public class RebrickableClient {
         return all;
     }
 
+    public String fetchUserToken(String username, String password) {
+        LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("username", username);
+        form.add("password", password);
+        try {
+            UserTokenDto dto = rebrickableRestClient.post()
+                    .uri("/users/_token/")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(form)
+                    .retrieve()
+                    .body(UserTokenDto.class);
+            if (dto == null || dto.userToken() == null) {
+                throw new RebrickableException("Rebrickable returned no token", 200, null);
+            }
+            return dto.userToken();
+        } catch (ResourceAccessException ex) {
+            throw new RebrickableException("Rebrickable did not respond for /users/_token/", null, ex);
+        } catch (RestClientResponseException ex) {
+            int status = ex.getStatusCode().value();
+            throw new RebrickableException(
+                    "Rebrickable returned " + status + " for /users/_token/",
+                    status, ex);
+        }
+    }
+
     private <T> PageResponse<T> fetchPage(String path, int page, ParameterizedTypeReference<PageResponse<T>> type) {
         Duration backoff = properties.backoff();
         for (int attempt = 1; ; attempt++) {
@@ -117,7 +144,7 @@ public class RebrickableClient {
 
     private void sleep(Duration wait) {
         try {
-            Thread.sleep(wait);
+            Thread.sleep(wait.toMillis());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new RebrickableException("Interrupted while waiting to retry Rebrickable", null, ex);
