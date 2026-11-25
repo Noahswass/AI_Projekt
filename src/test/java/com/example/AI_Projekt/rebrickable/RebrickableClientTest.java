@@ -17,19 +17,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RebrickableClientTest {
 
     private static final String THEMES = "/api/v3/lego/themes/";
+    private static final String USER_TOKEN = "/api/v3/users/_token/";
     private static final String SETS = "/api/v3/lego/sets/";
     private static final String COLOURS = "/api/v3/lego/colors/";
     private static final String PARTS = "/api/v3/lego/parts/";
@@ -111,6 +108,30 @@ class RebrickableClientTest {
                 .satisfies(ex -> assertThat(((RebrickableException) ex).getStatus()).isEqualTo(401));
         wireMock.verify(1, getRequestedFor(urlPathEqualTo(THEMES)));
     }
+
+    @Test
+    void userTokenSuccess() {
+        wireMock.stubFor(post(urlPathEqualTo(USER_TOKEN))
+                .willReturn(okJson("{\"user_token\":\"test_token\"}")));
+        String token = client.fetchUserToken("anna","secret");
+        assertThat(token)
+                .isEqualTo("test_token");
+        wireMock.verify(postRequestedFor(urlPathEqualTo(USER_TOKEN))
+                .withRequestBody(equalTo("username=anna&password=secret"))
+                .withHeader("Authorization", equalTo("key test-key")));
+    }
+
+    @Test
+    void wrongRebrickablePwd() {
+        wireMock.stubFor(post(urlPathEqualTo(USER_TOKEN))
+                .willReturn(aResponse().withStatus(403).withBody("{\"detail\":\"Invalid credentials\"}")));
+        RebrickableException ex = assertThrows(RebrickableException.class, () -> client.fetchUserToken("anna","wrong"));
+        assertThat(ex.getStatus()).isEqualTo(403);
+        wireMock.verify(1, postRequestedFor(urlPathEqualTo(USER_TOKEN))
+                .withRequestBody(equalTo("username=anna&password=wrong"))
+                .withHeader("Authorization", equalTo("key test-key")));
+    }
+
     @Test
     void emptyBodyFailsWithRebrickableException() {
         wireMock.stubFor(get(urlPathEqualTo(THEMES))
