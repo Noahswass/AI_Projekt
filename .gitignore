@@ -20,7 +20,7 @@ doc/*.csv
 *.iws
 *.iml
 *.ipr
-application-dev.properties
+application-dev2.properties
 
 
 ### NetBeans ###
