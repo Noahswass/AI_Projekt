@@ -14,7 +14,7 @@
     <h1 class="h3 mb-3">Register</h1>
     <p class="text-secondary">You do not need a Rebrickable account.</p>
 
-    <!-- novalidate: the server decides, so its messages are the ones the user sees -->
+    <!-- novalidate: the server decides, so its messageDtos are the ones the user sees -->
     <form method="post" th:action="@{/register}" th:object="${form}" novalidate>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>

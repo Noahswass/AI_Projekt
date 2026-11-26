@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LEGO Assistant</title>
+    <th:block th:replace="~{fragments/layout :: assets}"></th:block>
+</head>
+
+<body>
+<header th:replace="~{fragments/layout :: siteHeader}"></header>
+<main class="container py-4" style="max-width: 48rem;">
+    <h1 class="h3 mb-3">LEGO Assistant</h1>
+    <p class="text-secondary">Ask a question about LEGO sets. Answers are based only on the catalog.</p>
+
+    <form method="post" th:action="@{/assistant}">
+        <div class="mb-3">
+            <label for="question" class="form-label">Your question</label>
+            <textarea id="question" name="question" class="form-control" rows="3" maxlength="500"
+                      th:text="${question}" placeholder="How many parts does the Millennium Falcon have?"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Ask</button>
+    </form>
+
+    <section class="card mt-4" th:if="${answer}">
+        <div class="card-body">
+            <h2 class="h5 card-title">Answer</h2>
+            <p class="card-text" style="white-space: pre-wrap;" th:text="${answer}">Answer</p>
+
+            <div th:if="${sources != null and !#lists.isEmpty(sources)}">
+                <h3 class="h6 mt-3">Sources</h3>
+                <ul class="mb-0">
+                    <li th:each="s : ${sources}">
+                        <a th:href="@{/catalog/sets/{n}(n=${s})}" th:text="${s}">75192-1</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+
+</html>
