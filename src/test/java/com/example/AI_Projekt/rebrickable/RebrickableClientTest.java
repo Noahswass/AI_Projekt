@@ -48,7 +48,7 @@ class RebrickableClientTest {
         var properties = new RebrickableProperties(
                 wireMock.baseUrl() + "/api/v3", "test-key",
                 Duration.ofMillis(3000), MAX_ATTEMPTS, Duration.ofMillis(10));
-        RestClient restClient = new HTTPClientConfig(properties).rebrickableRestClient(RestClient.builder());
+        RestClient restClient = new HTTPClientConfig().rebrickableRestClient(RestClient.builder(), properties);
         client = new RebrickableClient(restClient, properties);
     }
 
@@ -205,7 +205,7 @@ class RebrickableClientTest {
         var properties = new RebrickableProperties(
                 wireMock.baseUrl() + "/api/v3", "test-key",
                 Duration.ofMillis(200), MAX_ATTEMPTS, Duration.ofMillis(10));
-        RestClient restClient = new HTTPClientConfig(properties).rebrickableRestClient(RestClient.builder());
+        RestClient restClient = new HTTPClientConfig().rebrickableRestClient(RestClient.builder(), properties);
         var impatientClient = new RebrickableClient(restClient, properties);
 
         wireMock.stubFor(get(urlPathEqualTo(THEMES))

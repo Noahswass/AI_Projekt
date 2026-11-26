@@ -44,7 +44,7 @@
 //  @Value("${app.model}")
 //  public String MODEL;
 //
-//  @Value("${app.temperature}")
+//  @Value("${app.effort}")
 //  public double TEMPERATURE;
 //
 //  @Value("${app.max_tokens}")
@@ -78,8 +78,8 @@
 //    //requestDto.setTop_p(TOP_P);
 //    requestDto.setFrequency_penalty(FREQUENCY_PENALTY);
 //    requestDto.setPresence_penalty(PRESENCE_PENALTY);
-//    requestDto.getMessages().add(new ChatCompletionRequest.Message("system", _systemMessage));
-//    requestDto.getMessages().add(new ChatCompletionRequest.Message("user", userPrompt));
+//    requestDto.getMessages().add(new ChatCompletionRequest.MessageDto("system", _systemMessage));
+//    requestDto.getMessages().add(new ChatCompletionRequest.MessageDto("user", userPrompt));
 //
 //    ObjectMapper mapper = new ObjectMapper();
 //    String json = "";
