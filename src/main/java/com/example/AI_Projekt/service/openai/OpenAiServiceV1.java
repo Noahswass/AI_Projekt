@@ -56,18 +56,18 @@
 //    Map<String, Object> body = new HashMap<>();
 //
 //    body.put("model", MODEL);
-//    List<Map<String, String>> messages = new ArrayList<>();
+//    List<Map<String, String>> messageDtos = new ArrayList<>();
 //
 //    Map<String, String> systemMessage = new HashMap<>();
 //    systemMessage.put("role", "system");
 //    systemMessage.put("content", _systemMessage);
-//    messages.add(systemMessage);
+//    messageDtos.add(systemMessage);
 //
 //    Map<String, String> userMessage = new HashMap<>();
 //    userMessage.put("role", "user");
 //    userMessage.put("content", userPrompt);
-//    messages.add(userMessage);
-//    body.put("messages", messages);
+//    messageDtos.add(userMessage);
+//    body.put("messageDtos", messageDtos);
 //    body.put("temperature", TEMPERATURE);
 //    body.put("max_tokens", MAX_TOKENS);
 //    body.put("top_p", 1);
