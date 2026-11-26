@@ -50,16 +50,18 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/").permitAll()
             // Anyone can register (GET shows the form, POST creates the account)
             .requestMatchers("/register").permitAll()
+            //Anyone can access assistant page
+            .requestMatchers("/assistant").permitAll()
             // formLogin's own permitAll() covers /login, /login?error and /login?logout exactly.
             // This line opens the page with any other parameter too, such as /login?registered.
             .requestMatchers(HttpMethod.GET, "/login").permitAll()
             // Admin pages, such as starting a catalog sync by hand
             .requestMatchers("/admin/**").hasRole("ADMIN")
             .anyRequest().authenticated())
-        // Our own login page instead of the generated one; the users come from AppUserDetailsService
-        .formLogin(form -> form.loginPage("/login").permitAll())
-        .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
-        .httpBasic(Customizer.withDefaults());
+            // Our own login page instead of the generated one; the users come from AppUserDetailsService
+            .formLogin(form -> form.loginPage("/login").permitAll())
+            .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
+            .httpBasic(Customizer.withDefaults());
     return http.build();
   }
 }
