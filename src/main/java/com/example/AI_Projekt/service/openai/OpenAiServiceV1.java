@@ -38,7 +38,7 @@
 //  @Value("${app.model}")
 //  public String MODEL;
 //
-//  @Value("${app.temperature}")
+//  @Value("${app.effort}")
 //  public double TEMPERATURE;
 //
 //  @Value("${app.max_tokens}")
@@ -68,7 +68,7 @@
 //    userMessage.put("content", userPrompt);
 //    messageDtos.add(userMessage);
 //    body.put("messageDtos", messageDtos);
-//    body.put("temperature", TEMPERATURE);
+//    body.put("effort", TEMPERATURE);
 //    body.put("max_tokens", MAX_TOKENS);
 //    body.put("top_p", 1);
 //    body.put("frequency_penalty", FREQUENCY_PENALTY);

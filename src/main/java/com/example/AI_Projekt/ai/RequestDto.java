@@ -7,4 +7,4 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record RequestDto(String model, int maxTokens, String system, List<MessageDto> messages) {}
+public record RequestDto(String model, int maxTokens, String system, List<MessageDto> messages, OutputConfigDto outputConfig) {}

@@ -44,7 +44,7 @@
 //  @Value("${app.model}")
 //  public String MODEL;
 //
-//  @Value("${app.temperature}")
+//  @Value("${app.effort}")
 //  public double TEMPERATURE;
 //
 //  @Value("${app.max_tokens}")
