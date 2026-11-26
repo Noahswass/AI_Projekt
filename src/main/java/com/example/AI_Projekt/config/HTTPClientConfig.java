@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -14,7 +15,6 @@ import org.springframework.web.client.RestClient;
 @RequiredArgsConstructor
 public class HTTPClientConfig {
 
-    private final RebrickableProperties rebrickable;
 
     /**
      * Rebrickable rest client rest client.
@@ -23,7 +23,7 @@ public class HTTPClientConfig {
      * @return the rest client
      */
     @Bean
-    public RestClient rebrickableRestClient(RestClient.Builder builder) {
+    public RestClient rebrickableRestClient(RestClient.Builder builder, RebrickableProperties rebrickable) {
         var factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(rebrickable.timeout());
         factory.setReadTimeout(rebrickable.timeout());
@@ -31,6 +31,19 @@ public class HTTPClientConfig {
                 .baseUrl(rebrickable.baseUrl())
                 .requestFactory(factory)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "key " + rebrickable.apiKey())
+                .build();
+    }
+    @Bean
+    public RestClient llmRestClient(RestClient.Builder builder, LlmProperties llm) {
+        var factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(llm.timeout());
+        factory.setReadTimeout(llm.timeout());
+        return builder
+                .baseUrl(llm.baseUrl())
+                .requestFactory(factory)
+                .defaultHeader("x-api-key", llm.apiKey())
+                .defaultHeader("anthropic-version", "2023-06-01")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 }
