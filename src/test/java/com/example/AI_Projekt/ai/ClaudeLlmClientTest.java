@@ -40,9 +40,9 @@ class ClaudeLlmClientTest {
 
     @BeforeEach
     void setUp() {
-        // LlmProperties order: baseUrl, apiKey, model, timeout, maxAttempts, backoff, temperature, maxTokens
+        // LlmProperties order: baseUrl, apiKey, model, timeout, maxAttempts, backoff, effort, maxTokens
         var properties = new LlmProperties(wireMock.baseUrl(), "test-key", "test-model",
-                Duration.ofMillis(3000), MAX_ATTEMPTS, Duration.ofMillis(0), 0.5, 100);
+                Duration.ofMillis(3000), MAX_ATTEMPTS, Duration.ofMillis(0), "low", 100);
         RestClient restClient = new HTTPClientConfig().llmRestClient(RestClient.builder(), properties);
         client = new ClaudeLlmClient(restClient, properties);
     }
@@ -132,7 +132,7 @@ class ClaudeLlmClientTest {
         // It talks to its own server: the slow request finishes after the test ends,
         // and on the shared server it would show up in the next test's request count.
         var properties = new LlmProperties(slowWireMock.baseUrl(), "test-key", "test-model",
-                Duration.ofMillis(200), MAX_ATTEMPTS, Duration.ofMillis(0), 0.5, 100);
+                Duration.ofMillis(200), MAX_ATTEMPTS, Duration.ofMillis(0), "low", 100);
         RestClient restClient = new HTTPClientConfig().llmRestClient(RestClient.builder(), properties);
         var impatientClient = new ClaudeLlmClient(restClient, properties);
         slowWireMock.stubFor(post(urlPathEqualTo(MESSAGES))
