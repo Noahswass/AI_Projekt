@@ -12,6 +12,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import java.security.Principal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,5 +106,24 @@ class AssistantControllerTest {
         mockMvc.perform(post("/assistant").with(csrf()).param("question", "   "))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Please ask a question.")));
+    }
+
+    // PB-19 step 3: the rate-limit key for the visitor
+
+    @Test
+    void visitorKeyUsesTheUsernameWhenLoggedIn() {
+        Principal noah = () -> "noah";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("10.0.0.5");
+
+        assertThat(AssistantController.visitorKey(noah, request)).isEqualTo("user:noah");
+    }
+
+    @Test
+    void visitorKeyUsesTheIpForAnonymousVisitors() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("10.0.0.5");
+
+        assertThat(AssistantController.visitorKey(null, request)).isEqualTo("ip:10.0.0.5");
     }
 }
