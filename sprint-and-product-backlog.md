@@ -139,7 +139,7 @@ relative estimates.
 |----|--------|-----|-------|-----|---------------------|
 | PB-17 | Done | P1 | As a visitor, I can ask the assistant questions about the catalog | 4 | `/assistant` answers from catalog data only. Prompt instructs "answer only from the data, say I don't know otherwise". Sources listed. Rate-limited for anonymous users. Unit test for PromptBuilder. |
 | PB-18 | Left | P1 | As a user, the assistant also answers about my collection | 3 | Logged-in answers include own collection context. Data limited per request (max items). Users cannot see another user's data. |
-| PB-19 | In progress | P1 | As the owner, AI endpoints are protected from abuse | 2 | Per-IP limit for anonymous and per-user limit for logged-in use (e.g. Bucket4j or a simple in-memory limiter). Returns 429 with ProblemDetail. |
+| PB-19 | Done | P1 | As the owner, AI endpoints are protected from abuse | 2 | Per-IP limit for anonymous and per-user limit for logged-in use (e.g. Bucket4j or a simple in-memory limiter). Returns 429 with ProblemDetail. |
 | PB-20 | Left | P2 | As the owner, I can see LLM cost and latency | 2 | Each call logs model, latency, input and output tokens. Actuator metrics exposed. |
 
 ### Epic G: Platform
