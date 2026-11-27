@@ -128,7 +128,7 @@ class AssistantControllerTest {
         when(rateLimiter.tryConsume(any(), anyBoolean())).thenReturn(false);
 
         mockMvc.perform(post("/assistant").with(csrf()).param("question", "Falcon?"))
-                .andExpect(status().isOk())
+                .andExpect(status().isTooManyRequests())          // PB-19 step 5: 429, still the page
                 .andExpect(model().attributeExists("error"))
                 .andExpect(model().attribute("question", "Falcon?"));
 

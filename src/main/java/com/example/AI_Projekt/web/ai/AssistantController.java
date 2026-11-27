@@ -3,7 +3,9 @@ package com.example.AI_Projekt.web.ai;
 import com.example.AI_Projekt.service.ai.AssistantRateLimiter;
 import com.example.AI_Projekt.service.ai.AssistantService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +28,7 @@ public class AssistantController {
         return "assistant/ask";
     }
     @PostMapping("/assistant")
-    public String ask(@RequestParam(required = false) String question, Model model, Principal principal, HttpServletRequest request) {
+    public String ask(@RequestParam(required = false) String question, Model model, Principal principal, HttpServletRequest request, HttpServletResponse response) {
         String cleaned = clean(question);
         model.addAttribute("question", cleaned);           // keep text in all paths
         if (cleaned == null || cleaned.isBlank()) {
@@ -36,6 +38,7 @@ public class AssistantController {
 
         boolean loggedIn = principal != null;
         if (!rateLimiter.tryConsume(visitorKey(principal, request), loggedIn)) {
+            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             model.addAttribute("error", loggedIn
                     ? "You've hit the question limit, try again in a bit."
                     : "This is a demo for non-logged-in users, log in to ask more questions ;)");
