@@ -97,58 +97,58 @@ Priority: **P0** = must have, **P1** = should have, **P2** = stretch. Points are
 relative estimates.
 
 ### Epic A: Foundation
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-01 | P0 | As a developer, I have a building `AI_Projekt` project | 2 | `mvn clean verify` passes on JDK 21. Package layout from section 3 exists. `.gitignore` covers `target/`, `.idea/`, `.env`. |
-| PB-02 | P0 | As a developer, the app starts with H2 and a health endpoint | 2 | `mvn spring-boot:run` on 8080. `GET /actuator/health` returns `UP`. Context-load test passes. |
-| PB-03 | P0 | As a developer, the schema is versioned | 2 | Flyway `V1__init.sql` is an empty baseline, `V2__catalog.sql` creates the catalog tables and `V3__user.sql` creates the user table. `ddl-auto=validate`. Migrations run on H2 and MySQL. |
-| PB-04 | P0 | As the system, I call Rebrickable with auth and resilience | 3 | `RebrickableClient` sends `Authorization: key <KEY>` from env. Timeouts set. Paginated responses are followed. 429 and 5xx retried with backoff. Mapped to DTO records. WireMock tests for success, 401, 429 and timeout. |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-01 | Done | P0 | As a developer, I have a building `AI_Projekt` project | 2 | `mvn clean verify` passes on JDK 21. Package layout from section 3 exists. `.gitignore` covers `target/`, `.idea/`, `.env`. |
+| PB-02 | Done | P0 | As a developer, the app starts with H2 and a health endpoint | 2 | `mvn spring-boot:run` on 8080. `GET /actuator/health` returns `UP`. Context-load test passes. |
+| PB-03 | Done | P0 | As a developer, the schema is versioned | 2 | Flyway `V1__init.sql` is an empty baseline, `V2__catalog.sql` creates the catalog tables and `V3__user.sql` creates the user table. `ddl-auto=validate`. Migrations run on H2 and MySQL. |
+| PB-04 | Done | P0 | As the system, I call Rebrickable with auth and resilience | 3 | `RebrickableClient` sends `Authorization: key <KEY>` from env. Timeouts set. Paginated responses are followed. 429 and 5xx retried with backoff. Mapped to DTO records. WireMock tests for success, 401, 429 and timeout. |
 
 ### Epic B: Daily catalog sync
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-05 | P0 | As the owner, themes, colours and sets are synced daily | 3 | `@Scheduled` job at 02:00 `Europe/Copenhagen`. Upserts themes, colours and sets by natural key. Re-running does not duplicate rows. |
-| PB-06 | P0 | As the owner, I can see the result of each sync | 3 | Each run writes a `sync_run` row with status and counts. Failed runs keep the error message. Part and minifig sync added. Test with WireMock. |
-| PB-07 | P1 | As the owner, I can trigger a sync manually | 1 | `POST /admin/sync` (ADMIN only, CSRF protected) starts a run. Only one run at a time (lock). |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-05 | Done | P0 | As the owner, themes, colours and sets are synced daily | 3 | `@Scheduled` job at 02:00 `Europe/Copenhagen`. Upserts themes, colours and sets by natural key. Re-running does not duplicate rows. |
+| PB-06 | Done | P0 | As the owner, I can see the result of each sync | 3 | Each run writes a `sync_run` row with status and counts. Failed runs keep the error message. Part and minifig sync added. Test with WireMock. |
+| PB-07 | Done | P1 | As the owner, I can trigger a sync manually | 1 | `POST /admin/sync` (ADMIN only, CSRF protected) starts a run. Only one run at a time (lock). |
 
 ### Epic C: Public catalog and landing
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-08 | P0 | As a visitor, I can browse and search sets without logging in | 3 | `/catalog/sets` paginated, filter by theme, search by name or set number. Data comes from the local DB. |
-| PB-09 | P0 | As a visitor, I can see a landing page with options | 2 | `/` lists browse, search, assistant and login/register options. Works without JavaScript. |
-| PB-10 | P1 | As a visitor, I can see set and part details | 2 | `/catalog/sets/{setNum}` shows picture, name, theme, year, parts count and a link to Rebrickable; an unknown set number gives the friendly 404. `/catalog/parts` lists parts with paging and search. (Inventory moved to PB-25.) |
-| PB-25 | P2 | As a visitor, I can see which parts are in a set | 3 | New migration for set inventories (part, colour, quantity, spare flag, minifigs). Filled from Rebrickable's catalog downloads, not live calls. `/catalog/sets/{setNum}` lists the newest inventory version. Re-import does not duplicate rows. |
-| PB-26 | P2 | As a visitor, every page shares one look and a site header | 2 | One stylesheet (`/css/app.css`) and one Thymeleaf fragment (`fragments/layout.html`) used by every page: Rubik font, colours from Rebrickable's colour list, a site header with links to Sets and Parts. Static files load for visitors (security permits the standard static folders). No login or logout links in the header, so the existing landing-page access rules hold. All existing page tests pass. |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-08 | Done | P0 | As a visitor, I can browse and search sets without logging in | 3 | `/catalog/sets` paginated, filter by theme, search by name or set number. Data comes from the local DB. |
+| PB-09 | Done | P0 | As a visitor, I can see a landing page with options | 2 | `/` lists browse, search, assistant and login/register options. Works without JavaScript. |
+| PB-10 | Done | P1 | As a visitor, I can see set and part details | 2 | `/catalog/sets/{setNum}` shows picture, name, theme, year, parts count and a link to Rebrickable; an unknown set number gives the friendly 404. `/catalog/parts` lists parts with paging and search. (Inventory moved to PB-25.) |
+| PB-25 | Left | P2 | As a visitor, I can see which parts are in a set | 3 | New migration for set inventories (part, colour, quantity, spare flag, minifigs). Filled from Rebrickable's catalog downloads, not live calls. `/catalog/sets/{setNum}` lists the newest inventory version. Re-import does not duplicate rows. |
+| PB-26 | Done | P2 | As a visitor, every page shares one look and a site header | 2 | One stylesheet (`/css/app.css`) and one Thymeleaf fragment (`fragments/layout.html`) used by every page: Rubik font, colours from Rebrickable's colour list, a site header with links to Sets and Parts. Static files load for visitors (security permits the standard static folders). No login or logout links in the header, so the existing landing-page access rules hold. All existing page tests pass. |
 
 ### Epic D: Accounts and security
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-11 | P0 | As a visitor, I can register and log in | 3 | Form login and registration. No Rebrickable account needed to register; a new account is enabled and can log in at once. BCrypt password hashes. Session cookie. CSRF on all forms. `/me/**` redirects to `/login` when anonymous. Integration test covers register, login and access rules. |
-| PB-12 | P1 | As the owner, admin pages are restricted to ADMIN | 1 | `/admin/**` returns 403 for USER. Admin account created by config or migration (no default password in git). |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-11 | Done | P0 | As a visitor, I can register and log in | 3 | Form login and registration. No Rebrickable account needed to register; a new account is enabled and can log in at once. BCrypt password hashes. Session cookie. CSRF on all forms. `/me/**` redirects to `/login` when anonymous. Integration test covers register, login and access rules. |
+| PB-12 | Done | P1 | As the owner, admin pages are restricted to ADMIN | 1 | `/admin/**` returns 403 for USER. Admin account created by config or migration (no default password in git). |
 
 ### Epic E: Own data from Rebrickable (Sprint 2)
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-13 | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a Rebrickable username and password and exchanges them for a user token (`POST /users/_token/`). The password is never stored or logged. Wrong credentials give a clear message and no link. Token encrypted with AES-GCM (key from env). Token never shown or logged. Link can be removed. Linking is optional; the account works without it. WireMock test for success and wrong credentials. Unit test for token encryption. |
-| PB-14 | P0 | As a user, my Rebrickable collection is imported | 4 | Only available with a linked account. Import pulls the user's sets and parts into `collection_item`. Re-import updates, does not duplicate. Errors shown on `/me`. |
-| PB-15 | P0 | As a user, I can view and edit my collection | 3 | `/me/collection` lists items with filter by type and theme. Quantity and notes editable. Changes saved locally. Without a linked account the page shows a prompt to link in `/me/settings` instead of an error. |
-| PB-16 | P1 | As a user, I can refresh my data on demand | 2 | "Refresh" button re-imports from Rebrickable. Rate-limited per user. |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-13 | Done | P0 | As a user, I can link my Rebrickable account in settings | 3 | `/me/settings` accepts a Rebrickable username and password and exchanges them for a user token (`POST /users/_token/`). The password is never stored or logged. Wrong credentials give a clear message and no link. Token encrypted with AES-GCM (key from env). Token never shown or logged. Link can be removed. Linking is optional; the account works without it. WireMock test for success and wrong credentials. Unit test for token encryption. |
+| PB-14 | Done | P0 | As a user, my Rebrickable collection is imported | 4 | Only available with a linked account. Import pulls the user's sets and parts into `collection_item`. Re-import updates, does not duplicate. Errors shown on `/me`. |
+| PB-15 | Left | P0 | As a user, I can view and edit my collection | 3 | `/me/collection` lists items with filter by type and theme. Quantity and notes editable. Changes saved locally. Without a linked account the page shows a prompt to link in `/me/settings` instead of an error. |
+| PB-16 | Left | P1 | As a user, I can refresh my data on demand | 2 | "Refresh" button re-imports from Rebrickable. Rate-limited per user. |
 
 ### Epic F: AI assistant (Sprint 2)
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-17 | P1 | As a visitor, I can ask the assistant questions about the catalog | 4 | `/assistant` answers from catalog data only. Prompt instructs "answer only from the data, say I don't know otherwise". Sources listed. Rate-limited for anonymous users. Unit test for PromptBuilder. |
-| PB-18 | P1 | As a user, the assistant also answers about my collection | 3 | Logged-in answers include own collection context. Data limited per request (max items). Users cannot see another user's data. |
-| PB-19 | P1 | As the owner, AI endpoints are protected from abuse | 2 | Per-IP limit for anonymous and per-user limit for logged-in use (e.g. Bucket4j or a simple in-memory limiter). Returns 429 with ProblemDetail. |
-| PB-20 | P2 | As the owner, I can see LLM cost and latency | 2 | Each call logs model, latency, input and output tokens. Actuator metrics exposed. |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-17 | Done | P1 | As a visitor, I can ask the assistant questions about the catalog | 4 | `/assistant` answers from catalog data only. Prompt instructs "answer only from the data, say I don't know otherwise". Sources listed. Rate-limited for anonymous users. Unit test for PromptBuilder. |
+| PB-18 | Left | P1 | As a user, the assistant also answers about my collection | 3 | Logged-in answers include own collection context. Data limited per request (max items). Users cannot see another user's data. |
+| PB-19 | In progress | P1 | As the owner, AI endpoints are protected from abuse | 2 | Per-IP limit for anonymous and per-user limit for logged-in use (e.g. Bucket4j or a simple in-memory limiter). Returns 429 with ProblemDetail. |
+| PB-20 | Left | P2 | As the owner, I can see LLM cost and latency | 2 | Each call logs model, latency, input and output tokens. Actuator metrics exposed. |
 
 ### Epic G: Platform
-| ID | Pri | Story | Pts | Acceptance criteria |
-|----|-----|-------|-----|---------------------|
-| PB-21 | P1 | As a user, I get clear errors instead of stack traces | 1 | `@RestControllerAdvice` returns `ProblemDetail` for validation, Rebrickable, LLM and access errors. Pages show friendly messages. |
-| PB-22 | P1 | As a developer, config and secrets come from env vars and profiles | 1 | `dev` and `prod` profiles. `.env` lists all variables. No secrets in git. |
-| PB-23 | P1 | As a developer, I can trust changes because of tests | 3 | Unit tests for sync mapping. Integration tests for security rules and catalog pages. JaCoCo branch coverage at least 70% on `rebrickable` and `security`; `mvn verify` fails below it. (PromptBuilder and token encryption tests moved to PB-17 and PB-13 in Sprint 2.) |
-| PB-24 | P2 | As a developer, I can run the full stack with one command | 2 | `docker-compose.yml` starts MySQL and `AI_Projekt` with the `prod` profile. |
+| ID | Status | Pri | Story | Pts | Acceptance criteria |
+|----|--------|-----|-------|-----|---------------------|
+| PB-21 | Done | P1 | As a user, I get clear errors instead of stack traces | 1 | `@RestControllerAdvice` returns `ProblemDetail` for validation, Rebrickable, LLM and access errors. Pages show friendly messages. |
+| PB-22 | Done | P1 | As a developer, config and secrets come from env vars and profiles | 1 | `dev` and `prod` profiles. `.env` lists all variables. No secrets in git. |
+| PB-23 | Done | P1 | As a developer, I can trust changes because of tests | 3 | Unit tests for sync mapping. Integration tests for security rules and catalog pages. JaCoCo branch coverage at least 70% on `rebrickable` and `security`; `mvn verify` fails below it. (PromptBuilder and token encryption tests moved to PB-17 and PB-13 in Sprint 2.) |
+| PB-24 | Left | P2 | As a developer, I can run the full stack with one command | 2 | `docker-compose.yml` starts MySQL and `AI_Projekt` with the `prod` profile. |
 
 **Totals**
 - Sprint 1 (P0 and P1 in Epics A–D, G): PB-01 to PB-12, PB-21 to PB-23 = 35

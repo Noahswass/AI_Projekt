@@ -1,5 +1,6 @@
 package com.example.AI_Projekt.web.ai;
 
+import com.example.AI_Projekt.service.ai.AssistantRateLimiter;
 import com.example.AI_Projekt.service.ai.AssistantService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class AssistantController {
     private static final int MAX_QUESTION_LENGTH = 500;
 
     private final AssistantService assistantService;
+    private final AssistantRateLimiter rateLimiter;
 
     @GetMapping("/assistant")
     public String form() {
@@ -25,14 +27,29 @@ public class AssistantController {
     }
     @PostMapping("/assistant")
     public String ask(@RequestParam(required = false) String question, Model model, Principal principal, HttpServletRequest request) {
-        String key = visitorKey(principal, request);
-        boolean loggedIn = principal != null;
         String cleaned = clean(question);
-        AssistantService.AssistantAnswer result = assistantService.ask(cleaned);
+        model.addAttribute("question", cleaned);           // keep text in all paths
+        if (cleaned == null || cleaned.isBlank()) {
+            model.addAttribute("error", "Please enter a question before asking.");
+            return "assistant/ask";                        // nothing asked, no quota used
+        }
 
-        model.addAttribute("question", cleaned);           // text box keeps what was typed
-        model.addAttribute("answer", result.answer());
-        model.addAttribute("sources", result.sources());
+        boolean loggedIn = principal != null;
+        if (!rateLimiter.tryConsume(visitorKey(principal, request), loggedIn)) {
+            model.addAttribute("error", loggedIn
+                    ? "You've hit the question limit, try again in a bit."
+                    : "This is a demo for non-logged-in users, log in to ask more questions ;)");
+            return "assistant/ask";
+        }
+        try {
+            AssistantService.AssistantAnswer result = assistantService.ask(cleaned);
+            model.addAttribute("question", cleaned);           // text box keeps what was typed
+            model.addAttribute("answer", result.answer());
+            model.addAttribute("sources", result.sources());
+        } catch (Exception e) {
+            model.addAttribute("error", "Something went wrong, try again in a bit.");
+            return "assistant/ask";
+        }
         return "assistant/ask";
     }
 
