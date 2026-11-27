@@ -23,6 +23,8 @@
         <button type="submit" class="btn btn-primary">Ask</button>
     </form>
 
+    <p class="error-line" th:if="${error}" th:text="${error}">Error</p>
+
     <section class="card mt-4" th:if="${answer}">
         <div class="card-body">
             <h2 class="h5 card-title">Answer</h2>

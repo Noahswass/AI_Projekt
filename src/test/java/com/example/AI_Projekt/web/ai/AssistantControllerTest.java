@@ -1,7 +1,9 @@
 package com.example.AI_Projekt.web.ai;
 
+import com.example.AI_Projekt.service.ai.AssistantRateLimiter;
 import com.example.AI_Projekt.service.ai.AssistantService;
 import com.example.AI_Projekt.service.ai.AssistantService.AssistantAnswer;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +14,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.mock.web.MockHttpServletRequest;
+
+import java.security.Principal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -40,6 +49,13 @@ class AssistantControllerTest {
     MockMvc mockMvc;
     @MockBean
     AssistantService assistantService;
+    @MockBean
+    AssistantRateLimiter rateLimiter;     // one real bucket would leak between test methods
+
+    @BeforeEach
+    void allowByDefault() {
+        when(rateLimiter.tryConsume(any(), anyBoolean())).thenReturn(true);
+    }
 
     @Test
     void visitorCanOpenThePage() throws Exception {
@@ -98,10 +114,55 @@ class AssistantControllerTest {
 
     @Test
     void blankQuestionStillShowsThePage() throws Exception {
-        when(assistantService.ask(isNull())).thenReturn(new AssistantAnswer("Please ask a question.", List.of()));
-
         mockMvc.perform(post("/assistant").with(csrf()).param("question", "   "))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Please ask a question.")));
+                .andExpect(content().string(containsString("Please enter a question before asking.")));
+
+        verifyNoInteractions(assistantService, rateLimiter);   // blank: no Claude call, no token spent
+    }
+
+    // PB-19 step 4: the limiter guards the Claude call
+
+    @Test
+    void blockedVisitorIsNotSentToTheAssistant() throws Exception {
+        when(rateLimiter.tryConsume(any(), anyBoolean())).thenReturn(false);
+
+        mockMvc.perform(post("/assistant").with(csrf()).param("question", "Falcon?"))
+                .andExpect(status().isTooManyRequests())          // PB-19 step 5: 429, still the page
+                .andExpect(model().attributeExists("error"))
+                .andExpect(model().attribute("question", "Falcon?"));
+
+        verifyNoInteractions(assistantService);
+    }
+
+    @Test
+    void allowedVisitorIsSentToTheAssistant() throws Exception {
+        when(assistantService.ask("Falcon?")).thenReturn(new AssistantAnswer("ok", List.of()));
+
+        mockMvc.perform(post("/assistant").with(csrf()).param("question", "Falcon?"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeDoesNotExist("error"));
+
+        verify(rateLimiter).tryConsume(startsWith("ip:"), eq(false));
+        verify(assistantService).ask("Falcon?");
+    }
+
+    // PB-19 step 3: the rate-limit key for the visitor
+
+    @Test
+    void visitorKeyUsesTheUsernameWhenLoggedIn() {
+        Principal noah = () -> "noah";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("10.0.0.5");
+
+        assertThat(AssistantController.visitorKey(noah, request)).isEqualTo("user:noah");
+    }
+
+    @Test
+    void visitorKeyUsesTheIpForAnonymousVisitors() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("10.0.0.5");
+
+        assertThat(AssistantController.visitorKey(null, request)).isEqualTo("ip:10.0.0.5");
     }
 }
